@@ -1,0 +1,2784 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Árbol de Materias - Ingeniería en Informática</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='0.9em' font-size='90'>🎓</text></svg>">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        /* Scrollbar personalizada */
+        ::-webkit-scrollbar {
+            width: 12px;
+            height: 12px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #1a1a1a;
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #404040;
+            border-radius: 10px;
+            border: 2px solid #1a1a1a;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #505050;
+        }
+
+        ::-webkit-scrollbar-corner {
+            background: #1a1a1a;
+        }
+
+        /* Firefox scrollbar */
+        * {
+            scrollbar-width: thin;
+            scrollbar-color: #404040 #1a1a1a;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #1a1a1a;
+            min-height: 100vh;
+            padding: 0;
+            margin: 0;
+        }
+
+        .container {
+            max-width: 100%;
+            margin: 0;
+            background: #2d2d2d;
+            box-shadow: none;
+            overflow: hidden;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header {
+            background: #1f1f1f;
+            color: #e0e0e0;
+            padding: 20px 30px;
+            border-bottom: 1px solid #404040;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .header-title {
+            flex-direction: column;
+        }
+
+        .header-left h1 {
+            font-size: 1.8em;
+            margin-bottom: 5px;
+            font-weight: 600;
+        }
+
+        .header-left p {
+            font-size: 0.9em;
+            color: #a0a0a0;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .info-button {
+            background: #404040;
+            color: #e0e0e0;
+            border: 1px solid #606060;
+            border-radius: 50%;
+            width: 28px;
+            height: 28px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0;
+        }
+
+        .info-button:hover {
+            background: #505050;
+            border-color: #707070;
+        }
+
+        .info-button {
+            background: #404040;
+            color: #e0e0e0;
+            border: 1px solid #606060;
+            border-radius: 50%;
+            width: 28px;
+            height: 28px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0;
+        }
+
+        .info-button:hover {
+            background: #505050;
+            border-color: #707070;
+        }
+
+        .header-stats {
+            display: flex;
+            gap: 30px;
+            flex-wrap: wrap;
+        }
+
+        .header-stats {
+            display: flex;
+            gap: 30px;
+            flex-wrap: wrap;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 1.5em;
+            font-weight: 600;
+            color: #e0e0e0;
+        }
+
+        .stat-label {
+            font-size: 0.75em;
+            color: #909090;
+            margin-top: 2px;
+        }
+
+        .stat-titulo-intermedio {
+            cursor: help;
+        }
+
+        .stat-titulo-intermedio .stat-value.si {
+            color: #28a745;
+        }
+
+        .stat-titulo-intermedio .stat-value.no {
+            color: #dc3545;
+        }
+
+        .controls {
+            padding: 15px 30px;
+            background: #252525;
+            border-bottom: 1px solid #404040;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .controls-left {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .controls-right {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            border: 1px solid #505050;
+            border-radius: 4px;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            background: #353535;
+            color: #e0e0e0;
+        }
+
+        .btn-primary {
+            background: #404040;
+            border-color: #606060;
+        }
+
+        .btn-primary:hover {
+            background: #505050;
+            border-color: #707070;
+        }
+
+        .btn-secondary {
+            background: #353535;
+            border-color: #505050;
+        }
+
+        .btn-secondary:hover {
+            background: #454545;
+            border-color: #606060;
+        }
+
+        .layout-menu {
+            position: absolute;
+            top: 45px;
+            left: 0;
+            background: #2d2d2d;
+            border: 1px solid #505050;
+            border-radius: 4px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            z-index: 1000;
+            min-width: 220px;
+        }
+
+        .layout-option {
+            padding: 12px 16px;
+            cursor: pointer;
+            color: #e0e0e0;
+            transition: background 0.2s;
+            border-bottom: 1px solid #404040;
+        }
+
+        .layout-option:last-child {
+            border-bottom: none;
+        }
+
+        .layout-option:hover {
+            background: #353535;
+        }
+
+        .layout-option.danger {
+            color: #ff6b6b;
+        }
+
+        .layout-option.danger:hover {
+            background: #3d2828;
+        }
+
+        .data-menu {
+            position: absolute;
+            top: 45px;
+            left: 140px;
+            background: #2d2d2d;
+            border: 1px solid #505050;
+            border-radius: 4px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            z-index: 1000;
+            min-width: 200px;
+        }
+
+        .info-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .info-modal-content {
+            background: #2d2d2d;
+            border: 1px solid #505050;
+            border-radius: 8px;
+            padding: 30px;
+            max-width: 650px;
+            max-height: 85vh;
+            overflow-y: auto;
+            color: #e0e0e0;
+        }
+
+        .info-modal-content h2 {
+            margin-top: 0;
+            color: #4fc3f7;
+            font-size: 1.5em;
+        }
+
+        .info-modal-content h3 {
+            color: #81c784;
+            font-size: 1.1em;
+            margin-top: 20px;
+            margin-bottom: 10px;
+        }
+
+        .info-modal-content p {
+            line-height: 1.6;
+            margin: 10px 0;
+        }
+
+        .info-modal-content ul {
+            margin: 10px 0;
+            padding-left: 25px;
+        }
+
+        .info-modal-content li {
+            margin: 8px 0;
+            line-height: 1.5;
+        }
+
+        .info-modal-content strong {
+            color: #4fc3f7;
+        }
+
+        .info-close-btn {
+            background: #404040;
+            color: #e0e0e0;
+            border: 1px solid #606060;
+            border-radius: 4px;
+            padding: 10px 20px;
+            cursor: pointer;
+            margin-top: 20px;
+            font-size: 14px;
+        }
+
+        .info-close-btn:hover {
+            background: #505050;
+        }
+
+        .info-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .info-modal-content {
+            background: #2d2d2d;
+            border: 1px solid #505050;
+            border-radius: 8px;
+            padding: 30px;
+            max-width: 650px;
+            max-height: 85vh;
+            overflow-y: auto;
+            color: #e0e0e0;
+        }
+
+        .info-modal-content h2 {
+            margin-top: 0;
+            color: #4fc3f7;
+            font-size: 1.5em;
+        }
+
+        .info-modal-content h3 {
+            color: #81c784;
+            font-size: 1.1em;
+            margin-top: 20px;
+            margin-bottom: 10px;
+        }
+
+        .info-modal-content p {
+            line-height: 1.6;
+            margin: 10px 0;
+        }
+
+        .info-modal-content ul {
+            margin: 10px 0;
+            padding-left: 25px;
+        }
+
+        .info-modal-content li {
+            margin: 8px 0;
+            line-height: 1.5;
+        }
+
+        .info-modal-content strong {
+            color: #4fc3f7;
+        }
+
+        .info-close-btn {
+            background: #404040;
+            color: #e0e0e0;
+            border: 1px solid #606060;
+            border-radius: 4px;
+            padding: 10px 20px;
+            cursor: pointer;
+            margin-top: 20px;
+            font-size: 14px;
+        }
+
+        .info-close-btn:hover {
+            background: #505050;
+        }
+
+        .controls-left {
+            position: relative;
+        }
+
+        .legend {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-left: auto;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 12px;
+            color: #b0b0b0;
+        }
+
+        .legend-color {
+            width: 16px;
+            height: 16px;
+            border-radius: 2px;
+            border: 1px solid #606060;
+        }
+
+        #graph {
+            width: 100%;
+            height: 100%;
+            flex: 1;
+            background: #2d2d2d;
+        }
+
+        .node {
+            cursor: move;
+            transition: all 0.3s;
+        }
+
+        .node:hover {
+            filter: brightness(1.1);
+        }
+
+        .node.highlighted circle {
+            filter: brightness(1.3);
+            stroke-width: 3px;
+        }
+
+        .node circle {
+            stroke-width: 3px;
+            stroke: #333;
+        }
+
+        .node text.node-name {
+            font-size: 11px;
+            font-weight: 500;
+            pointer-events: none;
+            fill: #e0e0e0;
+        }
+
+        .node text.node-codigo {
+            font-size: 9px;
+            font-weight: 400;
+            pointer-events: none;
+            fill: #888;
+        }
+
+        .node text.node-status {
+            font-size: 9px;
+            font-weight: 400;
+            pointer-events: none;
+            fill: #a0a0a0;
+            font-style: italic;
+        }
+
+        .link {
+            fill: none;
+            stroke: #555;
+            stroke-width: 1.5px;
+            stroke-opacity: 0.3;
+            transition: stroke 0.3s, stroke-opacity 0.3s, stroke-width 0.3s;
+        }
+
+        .link.highlighted {
+            stroke: #b0b0b0;
+            stroke-opacity: 0.8;
+            stroke-width: 2.5px;
+        }
+
+        .link-arrow {
+            fill: #555;
+            opacity: 0.4;
+            transition: fill 0.3s, opacity 0.3s;
+        }
+
+        .link-arrow.highlighted {
+            fill: #b0b0b0;
+            opacity: 0.8;
+        }
+
+        .year-label {
+            font-size: 14px;
+            font-weight: 600;
+            fill: #909090;
+        }
+
+        .semester-label {
+            font-size: 12px;
+            font-weight: 500;
+            fill: #707070;
+        }
+
+        .context-menu {
+            position: absolute;
+            background: #2d2d2d;
+            border: 1px solid #505050;
+            border-radius: 4px;
+            padding: 4px 0;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+            z-index: 1000;
+            display: none;
+        }
+
+        .context-menu-item {
+            padding: 8px 16px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: background 0.2s;
+            color: #e0e0e0;
+        }
+
+        .context-menu-item:hover {
+            background: #3d3d3d;
+        }
+
+        /* Modal styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 2000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.7);
+        }
+
+        .modal-content {
+            background-color: #2d2d2d;
+            margin: 2% auto;
+            padding: 0;
+            border: 1px solid #505050;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 1200px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+        }
+
+        .modal-header {
+            background: #1f1f1f;
+            padding: 20px 30px;
+            border-bottom: 1px solid #404040;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header h2 {
+            color: #e0e0e0;
+            margin: 0;
+            font-size: 1.5em;
+        }
+
+        .close {
+            color: #909090;
+            font-size: 32px;
+            font-weight: bold;
+            cursor: pointer;
+            line-height: 1;
+        }
+
+        .close:hover {
+            color: #e0e0e0;
+        }
+
+        .modal-body {
+            padding: 30px;
+        }
+
+        /* Horarios Grid */
+        .horarios-grid {
+            display: grid;
+            grid-template-columns: 100px repeat(6, 1fr);
+            gap: 1px;
+            background: #404040;
+            border: 1px solid #404040;
+        }
+
+        .horario-cell {
+            background: #2d2d2d;
+            padding: 15px;
+            min-height: 80px;
+            position: relative;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .horario-cell:hover {
+            background: #353535;
+        }
+
+        .horario-cell.has-materias {
+            cursor: default;
+        }
+
+        .horario-cell.has-materias:hover {
+            background: #2d2d2d;
+        }
+
+        .horario-header {
+            background: #1f1f1f;
+            font-weight: 600;
+            text-align: center;
+            color: #e0e0e0;
+            padding: 15px;
+        }
+
+        .horario-time {
+            background: #1f1f1f;
+            font-weight: 600;
+            color: #b0b0b0;
+            font-size: 0.85em;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding: 10px;
+        }
+
+        .materia-select {
+            width: 100%;
+            padding: 8px;
+            background: #353535;
+            color: #e0e0e0;
+            border: 1px solid #505050;
+            border-radius: 4px;
+            font-size: 0.85em;
+            display: none;
+        }
+
+        .materia-select.active {
+            display: block;
+        }
+
+        .materia-select option {
+            background: #353535;
+        }
+
+        .materia-tag {
+            background: #17a2b8;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.8em;
+            margin: 2px;
+            display: inline-block;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .materia-tag:hover {
+            background: #dc3545;
+            transform: scale(1.05);
+        }
+
+        /* Planificador */
+        .planificador-container {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .cuatrimestre-card {
+            background: #353535;
+            border: 1px solid #505050;
+            border-radius: 8px;
+            padding: 20px;
+        }
+
+        .cuatrimestre-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .cuatrimestre-title {
+            color: #e0e0e0;
+            font-size: 1.2em;
+            font-weight: 600;
+        }
+
+        .cuatrimestre-count {
+            color: #909090;
+            font-size: 0.9em;
+        }
+
+        .materias-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .materia-chip {
+            background: #454545;
+            color: #e0e0e0;
+            padding: 8px 12px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.9em;
+        }
+
+        .materia-chip .remove-btn {
+            background: #dc3545;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+            font-size: 0.8em;
+            line-height: 1;
+        }
+
+        .materia-chip .remove-btn:hover {
+            background: #c82333;
+        }
+
+        .add-materia-select {
+            width: 100%;
+            padding: 10px;
+            background: #2d2d2d;
+            color: #e0e0e0;
+            border: 1px solid #505050;
+            border-radius: 4px;
+        }
+
+        .optativas-info {
+            background: #353535;
+            padding: 15px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            border-left: 4px solid #17a2b8;
+        }
+
+        .optativas-info p {
+            margin: 5px 0;
+            color: #e0e0e0;
+        }
+
+        .minor-section {
+            margin-bottom: 30px;
+            background: #2d2d2d;
+            padding: 20px;
+            border-radius: 6px;
+            border: 1px solid #404040;
+        }
+
+        .minor-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #505050;
+        }
+
+        .minor-title {
+            font-size: 1.2em;
+            font-weight: 600;
+            color: #17a2b8;
+        }
+
+        .minor-progress {
+            font-size: 0.9em;
+            color: #a0a0a0;
+            background: #353535;
+            padding: 5px 12px;
+            border-radius: 12px;
+        }
+
+        .minor-progress.completed {
+            background: #28a745;
+            color: #fff;
+        }
+
+        .optativas-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+            gap: 10px;
+        }
+
+        .optativa-item {
+            background: #353535;
+            padding: 12px 15px;
+            border-radius: 4px;
+            border: 1px solid #505050;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+
+        .optativa-item:hover {
+            background: #404040;
+            border-color: #606060;
+        }
+
+        .optativa-item.selected {
+            background: #2d4a4a;
+            border-color: #17a2b8;
+        }
+
+        .optativa-checkbox {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+        }
+
+        .optativa-info-content {
+            flex: 1;
+        }
+
+        .optativa-codigo {
+            font-weight: 600;
+            color: #17a2b8;
+            margin-right: 8px;
+        }
+
+        .optativa-nombre {
+            color: #e0e0e0;
+        }
+
+        .optativa-correlativas {
+            font-size: 0.85em;
+            color: #a0a0a0;
+            margin-top: 4px;
+        }
+
+        /* Modal Información de Materia */
+        .materia-info-section {
+            margin-bottom: 20px;
+            background: #353535;
+            padding: 15px;
+            border-radius: 6px;
+            border: 1px solid #505050;
+        }
+
+        .materia-info-section h3 {
+            color: #17a2b8;
+            font-size: 1em;
+            margin-bottom: 10px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #505050;
+        }
+
+        .materia-info-field {
+            margin: 10px 0;
+        }
+
+        .materia-info-label {
+            color: #a0a0a0;
+            font-size: 0.9em;
+            margin-bottom: 5px;
+        }
+
+        .materia-info-value {
+            color: #e0e0e0;
+            font-size: 1em;
+        }
+
+        .materia-correlativa-tag {
+            display: inline-block;
+            background: #2d4a4a;
+            color: #17a2b8;
+            padding: 6px 12px;
+            border-radius: 4px;
+            margin: 4px 4px 4px 0;
+            font-size: 0.9em;
+            border: 1px solid #17a2b8;
+        }
+
+        .materia-correlativa-tag.posterior {
+            background: #4a3d2d;
+            color: #ffc107;
+            border-color: #ffc107;
+        }
+
+        .materia-info-textarea {
+            width: 100%;
+            min-height: 100px;
+            background: #2d2d2d;
+            color: #e0e0e0;
+            border: 1px solid #505050;
+            border-radius: 4px;
+            padding: 10px;
+            font-family: inherit;
+            font-size: 0.9em;
+            resize: vertical;
+        }
+
+        .materia-info-input {
+            width: 100%;
+            background: #2d2d2d;
+            color: #e0e0e0;
+            border: 1px solid #505050;
+            border-radius: 4px;
+            padding: 8px 12px;
+            font-family: inherit;
+            font-size: 0.95em;
+        }
+
+        .materia-info-input:focus,
+        .materia-info-textarea:focus {
+            outline: none;
+            border-color: #17a2b8;
+        }
+
+        .estado-selector {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .estado-option {
+            flex: 1;
+            min-width: 120px;
+            padding: 10px;
+            background: #2d2d2d;
+            border: 2px solid #505050;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: center;
+            color: #e0e0e0;
+        }
+
+        .estado-option:hover {
+            background: #353535;
+            border-color: #707070;
+        }
+
+        .estado-option.selected {
+            border-color: #17a2b8;
+            background: #2d4a4a;
+        }
+
+        .codigo-badge {
+            display: inline-block;
+            background: #2d2d2d;
+            color: #17a2b8;
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-family: 'Courier New', monospace;
+            font-size: 1.1em;
+            font-weight: 600;
+            border: 1px solid #17a2b8;
+        }
+
+        /* Colores para cada estado */
+        .estado-aprobada { fill: #28a745; }
+        .estado-cursando { fill: #17a2b8; }
+        .estado-final-previo { fill: #dc3545; }
+        .estado-inscripto { fill: #17a2b8; }
+        .estado-inscripto-falta-final { fill: #ffc107; }
+        .estado-final-pendiente { fill: #fd7e14; }
+        .estado-falta-final-correlativo { fill: #6a5868; }
+        .estado-falta-cursada-correlativa { fill: #524360; }
+        .estado-puedo-inscribirme { fill: #37685d; }
+        .estado-sin-estado { fill: #4a4a4a; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="header-left">
+                <div class="header-title">
+                    <h1>🎓 Árbol de Materias FAIN UADE</h1>
+                    <p>Ingeniería en Informática - Plan 1621 - Año 2021</p>
+                </div>
+                <button class="info-button" onclick="toggleInfoModal()" title="Ayuda">?</button>
+            </div>
+            <div class="header-stats">
+                <div class="stat-item">
+                    <div class="stat-value" id="stat-aprobadas">0</div>
+                    <div class="stat-label">Aprobadas</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="stat-inscriptas">0</div>
+                    <div class="stat-label">Inscriptas</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="stat-restantes">0</div>
+                    <div class="stat-label">Restantes</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="stat-total">0</div>
+                    <div class="stat-label">Total</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="stat-progreso">0%</div>
+                    <div class="stat-label">Progreso</div>
+                </div>
+                <div class="stat-item stat-titulo-intermedio">
+                    <div class="stat-value" id="stat-titulo-intermedio">NO</div>
+                    <div class="stat-label">Título Intermedio</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="controls">
+            <div class="controls-left">
+                <button class="btn btn-primary" onclick="toggleLayoutMenu()">🔄 Reordenar ▼</button>
+                <div id="layoutMenu" class="layout-menu" style="display: none;">
+                    <div class="layout-option" onclick="resetLayout('cuatrimestre')">📅 Por Cuatrimestre</div>
+                    <div class="layout-option" onclick="resetLayout('ramas')">🌳 Por Ramas de Correlatividad</div>
+                </div>
+                <button class="btn btn-secondary" onclick="toggleDataMenu()">💾 Datos ▼</button>
+                <div id="dataMenu" class="data-menu" style="display: none;">
+                    <div class="layout-option" onclick="exportData()">💾 Exportar Datos</div>
+                    <div class="layout-option" onclick="importData()">📥 Importar Datos</div>
+                    <div class="layout-option danger" onclick="limpiarDatos()">🗑️ Limpiar Todo</div>
+                </div>
+            </div>
+            <div class="controls-right">
+                <button class="btn btn-secondary" onclick="openHorariosModal()">📅 Ver Horarios</button>
+                <button class="btn btn-secondary" onclick="openPlanificadorModal()">📋 Planificador</button>
+                <button class="btn btn-secondary" onclick="openOptativasModal()">📚 Optativas</button>
+            </div>
+        </div>
+
+        <svg id="graph"></svg>
+    </div>
+
+    <div class="context-menu" id="contextMenu">
+        <div class="context-menu-item" onclick="setUserStatus('ninguno')">⚪ Sin estado</div>
+        <div class="context-menu-item" onclick="setUserStatus('cursando')">📝 Cursando</div>
+        <div class="context-menu-item" onclick="setUserStatus('final-previo')">🔴 Final Previo</div>
+        <div class="context-menu-item" onclick="setUserStatus('aprobada')">✅ Aprobada</div>
+    </div>
+
+    <div class="info-modal" id="infoModal" onclick="closeInfoModal(event)">
+        <div class="info-modal-content" onclick="event.stopPropagation()">
+            <h2>📖 Guía de Uso</h2>
+            
+            <h3>🔒 Privacidad</h3>
+            <p>Tu progreso es <strong>100% privado</strong>. Todo se guarda en el localStorage de tu navegador (local en tu PC). Nadie más puede ver tus datos.</p>
+            
+            <h3>🎯 Cómo usar</h3>
+            <ul>
+                <li><strong>Click derecho en una materia</strong> → Cambiar estado (cursando, final previo, aprobada)</li>
+                <li><strong>Click izquierdo</strong> → Ver info detallada, agregar notas y calificación (Ctrl + Click izquierdo funciona mejor)</li>
+                <li><strong>Arrastrar materias</strong> → Personalizar posiciones en el árbol</li>
+                <li><strong>Hover sobre materia</strong> → Ver correlativas resaltadas</li>
+            </ul>
+            
+            <h3>🔄 Reordenar</h3>
+            <ul>
+                <li><strong>Por Cuatrimestre</strong> → Organiza en columnas por año/cuatrimestre</li>
+                <li><strong>Por Ramas</strong> → Organiza según dependencias entre materias</li>
+            </ul>
+            
+            <h3>💾 Datos</h3>
+            <ul>
+                <li><strong>Exportar</strong> → Descarga un JSON con todo tu progreso</li>
+                <li><strong>Importar</strong> → Carga un backup previo (valida automáticamente)</li>
+                <li><strong>Limpiar</strong> → Elimina todos los datos (requiere confirmación)</li>
+            </ul>
+            
+            <h3>📅 Ver Horarios</h3>
+            <p>Planificá tu cursada semanal. Marcá los horarios de cada materia en una grilla.</p>
+            
+            <h3>📋 Planificador</h3>
+            <p>Organizá qué materias vas a cursar en futuros cuatrimestres. Arrastra materias entre columnas.</p>
+            
+            <h3>📚 Optativas</h3>
+            <p>Elegí tus 6 optativas entre 89 materias organizadas en 26 orientaciones. Las seleccionadas aparecen en el árbol.</p>
+            
+            <h3>📊 Estadísticas</h3>
+            <ul>
+                <li><strong>Aprobadas/Inscriptas/Pendientes</strong> → Tu progreso actual</li>
+                <li><strong>Título Intermedio</strong> → ¿Cumplís los requisitos? (hover para ver detalles)</li>
+            </ul>
+            
+            <button class="info-close-btn" onclick="toggleInfoModal()">Cerrar</button>
+        </div>
+    </div>
+
+    <!-- Modal Horarios -->
+    <div id="horariosModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>📅 Horarios del Cuatrimestre</h2>
+                <span class="close" onclick="closeHorariosModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="horarios-grid" id="horariosGrid"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Planificador -->
+    <div id="planificadorModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>📋 Planificador de Cuatrimestres</h2>
+                <span class="close" onclick="closePlanificadorModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="planificador-container" id="planificadorContainer"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Optativas -->
+    <div id="optativasModal" class="modal">
+        <div class="modal-content" style="max-width: 1200px;">
+            <div class="modal-header">
+                <h2>📚 Materias Optativas y Minors</h2>
+                <span class="close" onclick="closeOptativasModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="optativas-info">
+                    <p><strong>Se requieren 3 materias optativas del mismo Minor para obtenerlo.</strong></p>
+                    <p>Selecciona las materias que te interesan cursando:</p>
+                </div>
+                <div id="optativasContainer"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Información de Materia -->
+    <div id="materiaInfoModal" class="modal">
+        <div class="modal-content" style="max-width: 700px;">
+            <div class="modal-header">
+                <h2 id="materiaInfoTitulo">Información de la Materia</h2>
+                <span class="close" onclick="closeMateriaInfoModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div id="materiaInfoContent"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Datos de las materias extraídos del CSV
+        const materiasData = [
+            // 1° Año - 1° Cuatrimestre
+            {codigo: "3.4.069", nombre: "Fundamentos de Informática", correlativas: [], estadoUsuario: "ninguno", año: 1, cuatrimestre: 1},
+            {codigo: "3.4.164", nombre: "Sistemas de Información I", correlativas: [], estadoUsuario: "ninguno", año: 1, cuatrimestre: 1},
+            {codigo: "2.1.002", nombre: "Pensamiento Crítico y Comunicación", correlativas: [], estadoUsuario: "ninguno", año: 1, cuatrimestre: 1},
+            {codigo: "3.4.043", nombre: "Teoría de Sistemas", correlativas: [], estadoUsuario: "ninguno", año: 1, cuatrimestre: 1},
+            {codigo: "3.1.050", nombre: "Elementos de Álgebra y Geometría", correlativas: [], estadoUsuario: "ninguno", año: 1, cuatrimestre: 1},
+            
+            // 1° Año - 2° Cuatrimestre
+            {codigo: "3.4.071", nombre: "Programación I", correlativas: ["3.4.069"], estadoUsuario: "ninguno", año: 1, cuatrimestre: 2},
+            {codigo: "3.3.121", nombre: "Sistemas de Representación", correlativas: [], estadoUsuario: "ninguno", año: 1, cuatrimestre: 2},
+            {codigo: "3.2.178", nombre: "Fundamentos de Química", correlativas: [], estadoUsuario: "ninguno", año: 1, cuatrimestre: 2},
+            {codigo: "3.4.072", nombre: "Arquitectura de Computadores", correlativas: [], estadoUsuario: "ninguno", año: 1, cuatrimestre: 2},
+            {codigo: "3.1.024", nombre: "Matemática Discreta", correlativas: [], estadoUsuario: "ninguno", año: 1, cuatrimestre: 2},
+            {codigo: "3.1.051", nombre: "Álgebra", correlativas: ["3.1.050"], estadoUsuario: "ninguno", año: 1, cuatrimestre: 2},
+            
+            // 2° Año - 1° Cuatrimestre
+            {codigo: "3.4.074", nombre: "Programación II", correlativas: ["3.4.071"], estadoUsuario: "ninguno", año: 2, cuatrimestre: 1},
+            {codigo: "3.4.207", nombre: "Sistemas de Información II", correlativas: ["3.4.164"], estadoUsuario: "ninguno", año: 2, cuatrimestre: 1},
+            {codigo: "3.4.075", nombre: "Sistemas Operativos", correlativas: ["3.4.072"], estadoUsuario: "ninguno", año: 2, cuatrimestre: 1},
+            {codigo: "3.1.052", nombre: "Física I", correlativas: ["3.1.051"], estadoUsuario: "ninguno", año: 2, cuatrimestre: 1},
+            {codigo: "3.1.053", nombre: "Cálculo I", correlativas: [], estadoUsuario: "ninguno", año: 2, cuatrimestre: 1},
+            
+            // 2° Año - 2° Cuatrimestre
+            {codigo: "3.4.077", nombre: "Programación III", correlativas: ["3.4.074"], estadoUsuario: "ninguno", año: 2, cuatrimestre: 2},
+            {codigo: "3.4.208", nombre: "Paradigma Orientado a Objetos", correlativas: ["3.4.071"], estadoUsuario: "ninguno", año: 2, cuatrimestre: 2},
+            {codigo: "3.4.078", nombre: "Fundamentos de Telecomunicaciones", correlativas: [], estadoUsuario: "ninguno", año: 2, cuatrimestre: 2},
+            {codigo: "3.4.209", nombre: "Ingeniería de Datos I", correlativas: ["3.1.024"], estadoUsuario: "ninguno", año: 2, cuatrimestre: 2},
+            {codigo: "3.1.054", nombre: "Cálculo II", correlativas: ["3.1.053"], estadoUsuario: "ninguno", año: 2, cuatrimestre: 2},
+            
+            // 3° Año - 1° Cuatrimestre
+            {codigo: "3.4.210", nombre: "Proceso de Desarrollo de Software", correlativas: ["3.4.208"], estadoUsuario: "ninguno", año: 3, cuatrimestre: 1},
+            {codigo: "3.4.211", nombre: "Seminario de Integración Profesional", correlativas: ["3.4.074", "3.4.207", "3.4.209"], estadoUsuario: "ninguno", año: 3, cuatrimestre: 1},
+            {codigo: "3.4.212", nombre: "Teleinformática y Redes", correlativas: ["3.4.078"], estadoUsuario: "ninguno", año: 3, cuatrimestre: 1},
+            {codigo: "3.4.213", nombre: "Ingeniería de Datos II", correlativas: ["3.4.209"], estadoUsuario: "ninguno", año: 3, cuatrimestre: 1},
+            {codigo: "3.1.049", nombre: "Probabilidad y Estadística", correlativas: ["3.1.053"], estadoUsuario: "ninguno", año: 3, cuatrimestre: 1},
+            {codigo: "2.4.216", nombre: "Examen de Inglés", correlativas: [], estadoUsuario: "ninguno", año: 3, cuatrimestre: 1},
+            
+            // 3° Año - 2° Cuatrimestre
+            {codigo: "3.4.082", nombre: "Aplicaciones Interactivas", correlativas: ["3.4.208"], estadoUsuario: "ninguno", año: 3, cuatrimestre: 2},
+            {codigo: "3.4.214", nombre: "Ingeniería de Software", correlativas: ["3.4.207"], estadoUsuario: "ninguno", año: 3, cuatrimestre: 2},
+            {codigo: "3.1.055", nombre: "Física II", correlativas: ["3.1.052"], estadoUsuario: "ninguno", año: 3, cuatrimestre: 2},
+            {codigo: "3.4.215", nombre: "Teoría de la Computación", correlativas: ["3.1.024", "3.4.077"], estadoUsuario: "ninguno", año: 3, cuatrimestre: 2},
+            {codigo: "3.1.056", nombre: "Estadística Avanzada", correlativas: ["3.1.049"], estadoUsuario: "ninguno", año: 3, cuatrimestre: 2},
+            
+            // 4° Año - 1° Cuatrimestre
+            {codigo: "3.4.216", nombre: "Desarrollo de Aplicaciones I", correlativas: ["3.4.210"], estadoUsuario: "ninguno", año: 4, cuatrimestre: 1},
+            {codigo: "3.4.089", nombre: "Dirección de Proyectos Informáticos", correlativas: ["3.4.207"], estadoUsuario: "ninguno", año: 4, cuatrimestre: 1},
+            {codigo: "3.4.217", nombre: "Ciencia de Datos", correlativas: ["3.1.049", "3.4.213"], estadoUsuario: "ninguno", año: 4, cuatrimestre: 1},
+            {codigo: "3.4.092", nombre: "Seguridad e Integridad de la Información", correlativas: ["3.4.212"], estadoUsuario: "ninguno", año: 4, cuatrimestre: 1},
+            {codigo: "3.1.025", nombre: "Modelado y Simulación", correlativas: ["3.1.054"], estadoUsuario: "ninguno", año: 4, cuatrimestre: 1},
+            
+            // 4° Año - 2° Cuatrimestre
+            {codigo: "OPT-1", nombre: "Optativa I", correlativas: [], estadoUsuario: "ninguno", año: 4, cuatrimestre: 2},
+            {codigo: "3.4.218", nombre: "Desarrollo de Aplicaciones II", correlativas: ["3.4.082", "3.4.210"], estadoUsuario: "ninguno", año: 4, cuatrimestre: 2},
+            {codigo: "3.4.086", nombre: "Evaluación de Proyectos Informáticos", correlativas: ["3.1.049"], estadoUsuario: "ninguno", año: 4, cuatrimestre: 2},
+            {codigo: "3.4.096", nombre: "Inteligencia Artificial", correlativas: ["3.1.056"], estadoUsuario: "ninguno", año: 4, cuatrimestre: 2},
+            {codigo: "3.4.219", nombre: "Tecnología y Medio Ambiente", correlativas: [], estadoUsuario: "ninguno", año: 4, cuatrimestre: 2},
+            {codigo: "PPS06", nombre: "Práctica Profesional Supervisada", correlativas: [], estadoUsuario: "ninguno", año: 4, cuatrimestre: 2},
+            
+            // 5° Año - 1° Cuatrimestre
+            {codigo: "OPT-2", nombre: "Optativa II", correlativas: [], estadoUsuario: "ninguno", año: 5, cuatrimestre: 1},
+            {codigo: "3.4.094", nombre: "Arquitectura de Aplicaciones", correlativas: ["3.4.207"], estadoUsuario: "ninguno", año: 5, cuatrimestre: 1},
+            {codigo: "3.4.220", nombre: "Tendencias Tecnológicas", correlativas: [], estadoUsuario: "ninguno", año: 5, cuatrimestre: 1},
+            {codigo: "3.4.100", nombre: "Proyecto Final de Ingeniería en Informática", correlativas: [], estadoUsuario: "ninguno", año: 5, cuatrimestre: 1},
+            {codigo: "3.4.098", nombre: "Calidad de Software", correlativas: ["3.4.214"], estadoUsuario: "ninguno", año: 5, cuatrimestre: 1},
+            
+            // 5° Año - 2° Cuatrimestre
+            {codigo: "OPT-3", nombre: "Optativa III", correlativas: [], estadoUsuario: "ninguno", año: 5, cuatrimestre: 2},
+            {codigo: "3.4.221", nombre: "Negocios Tecnológicos", correlativas: [], estadoUsuario: "ninguno", año: 5, cuatrimestre: 2},
+            {codigo: "3.4.135", nombre: "Tecnología e Innovación", correlativas: [], estadoUsuario: "ninguno", año: 5, cuatrimestre: 2},
+            {codigo: "2.3.056", nombre: "Derecho Informático", correlativas: [], estadoUsuario: "ninguno", año: 5, cuatrimestre: 2}
+        ];
+
+        // Variables globales
+        let nodes = [];
+        let links = [];
+        let simulation;
+        let svg, g, link, node;
+        let selectedNode = null;
+        let isDragging = false;
+        let horariosSeleccionados = {};
+        let planificacion = [];
+        let optativasSeleccionadas = [];
+        let materiasNotas = {}; // {codigo: {notas: "texto", notaFinal: 8}}
+        const width = window.innerWidth;
+        const height = window.innerHeight - 150;
+
+        // Cargar datos guardados del localStorage
+        function loadSavedData() {
+            const saved = localStorage.getItem('materiasEstadosUsuario');
+            if (saved) {
+                const savedStates = JSON.parse(saved);
+                materiasData.forEach(materia => {
+                    if (savedStates[materia.codigo]) {
+                        materia.estadoUsuario = savedStates[materia.codigo];
+                    }
+                });
+            }
+        }
+
+        // Guardar estados en localStorage
+        function saveData() {
+            const estados = {};
+            materiasData.forEach(materia => {
+                estados[materia.codigo] = materia.estadoUsuario;
+            });
+            localStorage.setItem('materiasEstadosUsuario', JSON.stringify(estados));
+        }
+
+        // Calcular estado real basado en correlatividades
+        function calcularEstadoReal(materia) {
+            // Si ya está aprobada, ese es su estado
+            if (materia.estadoUsuario === 'aprobada') {
+                return { estado: 'Aprobada', clase: 'estado-aprobada' };
+            }
+            
+            // Si tiene final previo
+            if (materia.estadoUsuario === 'final-previo') {
+                return { estado: 'Final Previo', clase: 'estado-final-previo' };
+            }
+            
+            // Si está cursando
+            if (materia.estadoUsuario === 'cursando') {
+                // Verificar si tiene finales previos pendientes
+                const tieneFinalPrevio = materia.correlativas.some(corrCodigo => {
+                    const corr = materiasData.find(m => m.codigo === corrCodigo);
+                    return corr && (corr.estadoUsuario === 'cursando' || corr.estadoUsuario === 'final-previo');
+                });
+                
+                if (tieneFinalPrevio) {
+                    return { estado: 'Inscripto (falta final correlativo)', clase: 'estado-inscripto-falta-final' };
+                }
+                
+                return { estado: 'Cursando', clase: 'estado-cursando' };
+            }
+            
+            // Si no tiene estado del usuario, verificar correlativas
+            if (materia.estadoUsuario === 'ninguno') {
+                // Verificar si todas las correlativas están aprobadas
+                const todasAprobadas = materia.correlativas.every(corrCodigo => {
+                    const corr = materiasData.find(m => m.codigo === corrCodigo);
+                    return corr && corr.estadoUsuario === 'aprobada';
+                });
+                
+                if (materia.correlativas.length === 0 || todasAprobadas) {
+                    return { estado: 'Puedo Inscribirme', clase: 'estado-puedo-inscribirme' };
+                }
+                
+                // Verificar si alguna correlativa está siendo cursada o tiene final previo
+                const algunaCursando = materia.correlativas.some(corrCodigo => {
+                    const corr = materiasData.find(m => m.codigo === corrCodigo);
+                    return corr && (corr.estadoUsuario === 'cursando' || corr.estadoUsuario === 'final-previo');
+                });
+                
+                if (algunaCursando) {
+                    return { estado: 'Falta Final Correlativo', clase: 'estado-falta-final-correlativo' };
+                }
+                
+                // Alguna correlativa no está ni aprobada ni cursando
+                return { estado: 'Falta Cursada Correlativa', clase: 'estado-falta-cursada-correlativa' };
+            }
+            
+            return { estado: 'Sin estado', clase: 'estado-sin-estado' };
+        }
+
+        // Normalizar estados para clases CSS
+        function getEstadoClass(materia) {
+            return calcularEstadoReal(materia).clase;
+        }
+
+        function getEstadoTexto(materia) {
+            return calcularEstadoReal(materia).estado;
+        }
+
+        // Inicializar el grafo
+        function initGraph() {
+            loadSavedData();
+
+            // Crear nodos
+            nodes = materiasData.map(m => ({
+                id: m.codigo,
+                codigo: m.codigo,
+                nombre: m.nombre,
+                estadoUsuario: m.estadoUsuario,
+                año: m.año,
+                cuatrimestre: m.cuatrimestre,
+                correlativas: m.correlativas
+            }));
+
+            // Crear links (conexiones entre materias)
+            links = [];
+            materiasData.forEach(materia => {
+                materia.correlativas.forEach(corrCodigo => {
+                    links.push({
+                        source: corrCodigo,
+                        target: materia.codigo
+                    });
+                });
+            });
+
+            // Establecer layout inicial por defecto
+            setDefaultLayout();
+
+            renderGraph();
+            updateStats();
+        }
+
+        // Layout por defecto organizado en columnas por cuatrimestre
+        function setDefaultLayout() {
+            const savedPositions = localStorage.getItem('nodePositions');
+            
+            // Si hay posiciones guardadas, usarlas
+            if (savedPositions) {
+                const positions = JSON.parse(savedPositions);
+                let hasValidPositions = false;
+                nodes.forEach(node => {
+                    if (positions[node.id]) {
+                        node.x = positions[node.id].x;
+                        node.y = positions[node.id].y;
+                        hasValidPositions = true;
+                    }
+                });
+                if (hasValidPositions) return;
+            }
+
+            // Organizar en columnas por cuatrimestre
+            const columnWidth = (width - 120) / 10; // 10 columnas con márgenes
+            const padding = 60;
+            const startY = 50;
+            
+            // Agrupar por cuatrimestre
+            const grupos = {};
+            nodes.forEach(node => {
+                const cuatriIndex = (node.año - 1) * 2 + node.cuatrimestre - 1; // 0-9
+                if (!grupos[cuatriIndex]) {
+                    grupos[cuatriIndex] = [];
+                }
+                grupos[cuatriIndex].push(node);
+            });
+            
+            // Posicionar nodos en columnas verticales
+            for (let colIndex = 0; colIndex < 10; colIndex++) {
+                const grupo = grupos[colIndex] || [];
+                const colX = padding + colIndex * columnWidth + columnWidth / 2;
+                
+                // Calcular espacio vertical disponible
+                const availableHeight = height - 100;
+                const itemHeight = Math.min(70, availableHeight / Math.max(grupo.length, 1));
+                const totalHeight = grupo.length * itemHeight;
+                const offsetY = startY + (availableHeight - totalHeight) / 2;
+                
+                grupo.forEach((node, idx) => {
+                    node.x = colX;
+                    node.y = offsetY + 40 + (idx * itemHeight);
+                });
+            }
+        }
+
+        // Renderizar el grafo
+        function renderGraph() {
+            d3.select("#graph").selectAll("*").remove();
+
+            svg = d3.select("#graph")
+                .attr("width", width)
+                .attr("height", height);
+
+            // Agregar zoom
+            const zoom = d3.zoom()
+                .scaleExtent([0.3, 3])
+                .on("zoom", (event) => {
+                    g.attr("transform", event.transform);
+                });
+
+            svg.call(zoom);
+
+            g = svg.append("g");
+
+            // Definir marcador de flecha
+            svg.append("defs").append("marker")
+                .attr("id", "arrowhead")
+                .attr("viewBox", "-0 -5 10 10")
+                .attr("refX", 25)
+                .attr("refY", 0)
+                .attr("orient", "auto")
+                .attr("markerWidth", 8)
+                .attr("markerHeight", 8)
+                .append("svg:path")
+                .attr("d", "M 0,-5 L 10,0 L 0,5")
+                .attr("class", "link-arrow");
+
+            // Definir marcador de flecha destacado
+            svg.append("defs").append("marker")
+                .attr("id", "arrowhead-highlighted")
+                .attr("viewBox", "-0 -5 10 10")
+                .attr("refX", 25)
+                .attr("refY", 0)
+                .attr("orient", "auto")
+                .attr("markerWidth", 8)
+                .attr("markerHeight", 8)
+                .append("svg:path")
+                .attr("d", "M 0,-5 L 10,0 L 0,5")
+                .attr("class", "link-arrow highlighted");
+
+            // Dibujar etiquetas de cuatrimestre
+            const columnWidth = (width - 120) / 10;
+            for (let i = 0; i < 10; i++) {
+                const año = Math.floor(i / 2) + 1;
+                const cuatri = (i % 2) + 1;
+                g.append("text")
+                    .attr("class", "semester-label")
+                    .attr("x", 60 + i * columnWidth + columnWidth / 2)
+                    .attr("y", 20)
+                    .attr("text-anchor", "middle")
+                    .text(`${año}° - ${cuatri}C`);
+            }
+
+            // Crear links como paths curvados
+            link = g.append("g")
+                .selectAll("path")
+                .data(links)
+                .enter().append("path")
+                .attr("class", "link")
+                .attr("marker-end", "url(#arrowhead)")
+                .attr("fill", "none");
+
+            // Crear nodos
+            const nodeGroup = g.append("g")
+                .selectAll("g")
+                .data(nodes)
+                .enter().append("g")
+                .attr("class", "node")
+                .attr("transform", d => `translate(${d.x},${d.y})`)
+                .call(d3.drag()
+                    .on("start", dragstarted)
+                    .on("drag", dragged)
+                    .on("end", dragended))
+                .on("click", handleNodeClick)
+                .on("contextmenu", showContextMenu)
+                .on("mouseenter", highlightDependencies)
+                .on("mouseleave", clearHighlight);
+
+            nodeGroup.append("circle")
+                .attr("r", 12)
+                .attr("class", d => getEstadoClass(d));
+
+            nodeGroup.append("text")
+                .attr("class", "node-name")
+                .attr("dx", 16)
+                .attr("dy", 4)
+                .text(d => d.nombre);
+
+            nodeGroup.append("text")
+                .attr("class", "node-status")
+                .attr("dx", 16)
+                .attr("dy", 16)
+                .text(d => getEstadoTexto(d));
+
+            node = nodeGroup;
+
+            // Actualizar posiciones de links
+            updateLinks();
+        }
+
+        function updateLinks() {
+            link.attr("d", d => {
+                const sourceNode = nodes.find(n => n.id === d.source.id || n.id === d.source);
+                const targetNode = nodes.find(n => n.id === d.target.id || n.id === d.target);
+                
+                if (!sourceNode || !targetNode) return "";
+                
+                const dx = targetNode.x - sourceNode.x;
+                const dy = targetNode.y - sourceNode.y;
+                const dr = Math.sqrt(dx * dx + dy * dy) * 1.5;
+                
+                return `M ${sourceNode.x},${sourceNode.y} A ${dr},${dr} 0 0,1 ${targetNode.x},${targetNode.y}`;
+            });
+        }
+
+        function dragstarted(event, d) {
+            isDragging = false;
+            d3.select(this).raise();
+            d.fx = d.x;
+            d.fy = d.y;
+        }
+
+        function dragged(event, d) {
+            isDragging = true;
+            d.fx = event.x;
+            d.fy = event.y;
+            d.x = event.x;
+            d.y = event.y;
+            d3.select(this).attr("transform", `translate(${d.x},${d.y})`);
+            updateLinks();
+        }
+
+        function dragended(event, d) {
+            d.fx = null;
+            d.fy = null;
+            if (isDragging) {
+                saveNodePositions();
+            }
+        }
+
+        function handleNodeClick(event, d) {
+            // Solo mostrar modal si NO hubo drag
+            if (!isDragging) {
+                event.preventDefault();
+                event.stopPropagation();
+                openMateriaInfoModal(d);
+            }
+        }
+
+        // Destacar árbol de dependencias
+        function highlightDependencies(event, d) {
+            // Encontrar todas las correlativas (hacia atrás)
+            const dependencies = new Set();
+            
+            function findDependencies(nodeId) {
+                const node = nodes.find(n => n.id === nodeId);
+                if (!node) return;
+                
+                node.correlativas.forEach(corrId => {
+                    if (!dependencies.has(corrId)) {
+                        dependencies.add(corrId);
+                        findDependencies(corrId);
+                    }
+                });
+            }
+            
+            findDependencies(d.id);
+            
+            // Encontrar todas las materias que dependen de esta (hacia adelante)
+            const dependents = new Set();
+            
+            function findDependents(nodeId) {
+                nodes.forEach(node => {
+                    if (node.correlativas.includes(nodeId) && !dependents.has(node.id)) {
+                        dependents.add(node.id);
+                        findDependents(node.id);
+                    }
+                });
+            }
+            
+            findDependents(d.id);
+            
+            // Combinar ambos conjuntos
+            const allRelated = new Set([...dependencies, ...dependents]);
+            
+            // Destacar nodos
+            d3.selectAll('.node')
+                .classed('highlighted', n => allRelated.has(n.id));
+            
+            // Destacar links
+            d3.selectAll('.link')
+                .classed('highlighted', l => {
+                    const sourceId = l.source.id || l.source;
+                    const targetId = l.target.id || l.target;
+                    return (allRelated.has(sourceId) && allRelated.has(targetId)) ||
+                           (allRelated.has(sourceId) && targetId === d.id) ||
+                           (sourceId === d.id && allRelated.has(targetId));
+                })
+                .attr('marker-end', l => {
+                    const sourceId = l.source.id || l.source;
+                    const targetId = l.target.id || l.target;
+                    const isHighlighted = (allRelated.has(sourceId) && allRelated.has(targetId)) ||
+                                        (allRelated.has(sourceId) && targetId === d.id) ||
+                                        (sourceId === d.id && allRelated.has(targetId));
+                    return isHighlighted ? 'url(#arrowhead-highlighted)' : 'url(#arrowhead)';
+                });
+        }
+
+        function clearHighlight() {
+            d3.selectAll('.node').classed('highlighted', false);
+            d3.selectAll('.link')
+                .classed('highlighted', false)
+                .attr('marker-end', 'url(#arrowhead)');
+        }
+
+        function saveNodePositions() {
+            const positions = {};
+            nodes.forEach(node => {
+                positions[node.id] = {x: node.x, y: node.y};
+            });
+            localStorage.setItem('nodePositions', JSON.stringify(positions));
+        }
+
+        function showContextMenu(event, d) {
+            event.preventDefault();
+            selectedNode = d;
+            const menu = document.getElementById('contextMenu');
+            menu.style.display = 'block';
+            menu.style.left = event.pageX + 'px';
+            menu.style.top = event.pageY + 'px';
+        }
+
+        function setUserStatus(newStatus) {
+            if (selectedNode) {
+                selectedNode.estadoUsuario = newStatus;
+                
+                // Actualizar en materiasData
+                const materia = materiasData.find(m => m.codigo === selectedNode.id);
+                if (materia) {
+                    materia.estadoUsuario = newStatus;
+                }
+                
+                // Actualizar todos los nodos (porque otros pueden cambiar de estado)
+                d3.selectAll('.node')
+                    .select('circle')
+                    .attr('class', d => getEstadoClass(d));
+                
+                d3.selectAll('.node')
+                    .select('text.node-status')
+                    .text(d => getEstadoTexto(d));
+                
+                saveData();
+                updateStats();
+            }
+            hideContextMenu();
+        }
+
+        function hideContextMenu() {
+            document.getElementById('contextMenu').style.display = 'none';
+            selectedNode = null;
+        }
+
+        function toggleLayoutMenu() {
+            const menu = document.getElementById('layoutMenu');
+            const dataMenu = document.getElementById('dataMenu');
+            dataMenu.style.display = 'none';
+            menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
+        }
+
+        function toggleDataMenu() {
+            const menu = document.getElementById('dataMenu');
+            const layoutMenu = document.getElementById('layoutMenu');
+            layoutMenu.style.display = 'none';
+            menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
+        }
+
+        function toggleInfoModal() {
+            const modal = document.getElementById('infoModal');
+            if (modal.style.display === 'flex') {
+                modal.style.display = 'none';
+            } else {
+                modal.style.display = 'flex';
+            }
+        }
+
+        function closeInfoModal(event) {
+            if (event.target.id === 'infoModal') {
+                toggleInfoModal();
+            }
+        }
+
+        function resetLayout(tipo = 'cuatrimestre') {
+            // Ocultar menú
+            document.getElementById('layoutMenu').style.display = 'none';
+            
+            // Limpiar posiciones guardadas
+            localStorage.removeItem('nodePositions');
+            
+            if (tipo === 'cuatrimestre') {
+                layoutPorCuatrimestre();
+            } else if (tipo === 'ramas') {
+                layoutPorRamas();
+            }
+        }
+
+        function layoutPorCuatrimestre() {
+            // Reorganizar en columnas por cuatrimestre
+            const columnWidth = (width - 120) / 10;
+            const padding = 60;
+            const startY = 50;
+            
+            // Agrupar por cuatrimestre
+            const grupos = {};
+            nodes.forEach(node => {
+                const cuatriIndex = (node.año - 1) * 2 + node.cuatrimestre - 1; // 0-9
+                if (!grupos[cuatriIndex]) {
+                    grupos[cuatriIndex] = [];
+                }
+                grupos[cuatriIndex].push(node);
+            });
+            
+            // Posicionar nodos en columnas con animación
+            for (let colIndex = 0; colIndex < 10; colIndex++) {
+                const grupo = grupos[colIndex] || [];
+                const colX = padding + colIndex * columnWidth + columnWidth / 2;
+                
+                const availableHeight = height - 100;
+                const itemHeight = Math.min(70, availableHeight / Math.max(grupo.length, 1));
+                const totalHeight = grupo.length * itemHeight;
+                const offsetY = startY + (availableHeight - totalHeight) / 2;
+                
+                grupo.forEach((node, idx) => {
+                    node.x = colX;
+                    node.y = offsetY + 40 + (idx * itemHeight);
+                });
+            }
+            
+            // Animar transición
+            d3.selectAll('.node')
+                .transition()
+                .duration(800)
+                .attr("transform", d => `translate(${d.x},${d.y})`);
+            
+            updateLinks();
+        }
+
+        function layoutPorRamas() {
+            // Identificar nodos raíz (sin correlativas)
+            const raices = nodes.filter(n => !n.correlativas || n.correlativas.length === 0);
+            
+            // Crear árbol de dependencias
+            const nodosConNivel = new Map();
+            const nodosVisitados = new Set();
+            
+            function calcularNivel(nodeId, nivel = 0, rama = 0) {
+                if (nodosVisitados.has(nodeId)) return;
+                nodosVisitados.add(nodeId);
+                
+                const nivelActual = nodosConNivel.get(nodeId);
+                if (nivelActual === undefined || nivel > nivelActual.nivel) {
+                    nodosConNivel.set(nodeId, { nivel, rama });
+                }
+                
+                // Encontrar materias que dependen de esta
+                const dependientes = nodes.filter(n => 
+                    n.correlativas && n.correlativas.includes(nodeId)
+                );
+                
+                dependientes.forEach((dep, idx) => {
+                    calcularNivel(dep.id, nivel + 1, rama + idx * 0.1);
+                });
+            }
+            
+            // Calcular niveles desde cada raíz
+            raices.forEach((raiz, idx) => {
+                calcularNivel(raiz.id, 0, idx);
+            });
+            
+            // Posicionar nodos
+            const maxNivel = Math.max(...Array.from(nodosConNivel.values()).map(v => v.nivel));
+            const columnWidth = (width - 120) / (maxNivel + 1);
+            const padding = 60;
+            
+            // Agrupar por nivel
+            const porNivel = {};
+            nodosConNivel.forEach((info, nodeId) => {
+                if (!porNivel[info.nivel]) {
+                    porNivel[info.nivel] = [];
+                }
+                const node = nodes.find(n => n.id === nodeId);
+                if (node) {
+                    porNivel[info.nivel].push({ node, rama: info.rama });
+                }
+            });
+            
+            // Posicionar
+            Object.keys(porNivel).forEach(nivel => {
+                const grupo = porNivel[nivel];
+                grupo.sort((a, b) => a.rama - b.rama);
+                
+                const colX = padding + parseInt(nivel) * columnWidth + columnWidth / 2;
+                const availableHeight = height - 100;
+                const itemHeight = Math.min(80, availableHeight / Math.max(grupo.length, 1));
+                const totalHeight = grupo.length * itemHeight;
+                const offsetY = 50 + (availableHeight - totalHeight) / 2;
+                
+                grupo.forEach((item, idx) => {
+                    item.node.x = colX;
+                    item.node.y = offsetY + 40 + (idx * itemHeight);
+                });
+            });
+            
+            // Animar transición
+            d3.selectAll('.node')
+                .transition()
+                .duration(800)
+                .attr("transform", d => `translate(${d.x},${d.y})`);
+            
+            updateLinks();
+        }
+
+        function updateStats() {
+            const aprobadas = materiasData.filter(m => m.estadoUsuario === 'aprobada').length;
+            const cursando = materiasData.filter(m => m.estadoUsuario === 'cursando' || m.estadoUsuario === 'final-previo').length;
+            const total = materiasData.length;
+            const restantes = total - aprobadas;
+            const progreso = Math.round((aprobadas / total) * 100);
+            
+            // Calcular promedio
+            const materiasConNota = materiasData
+                .filter(m => m.estadoUsuario === 'aprobada' && materiasNotas[m.codigo]?.notaFinal)
+                .map(m => parseFloat(materiasNotas[m.codigo].notaFinal))
+                .filter(nota => !isNaN(nota) && nota >= 1 && nota <= 10);
+            
+            const promedio = materiasConNota.length > 0
+                ? (materiasConNota.reduce((sum, nota) => sum + nota, 0) / materiasConNota.length).toFixed(2)
+                : null;
+            
+            document.getElementById('stat-aprobadas').textContent = aprobadas;
+            // Solo mostrar promedio si hay notas cargadas
+            if (promedio !== null) {
+                document.getElementById('stat-aprobadas').title = `Promedio: ${promedio}`;
+                document.getElementById('stat-aprobadas').style.cursor = 'help';
+            } else {
+                document.getElementById('stat-aprobadas').title = '';
+                document.getElementById('stat-aprobadas').style.cursor = 'default';
+            }
+            document.getElementById('stat-inscriptas').textContent = cursando;
+            document.getElementById('stat-restantes').textContent = restantes;
+            document.getElementById('stat-total').textContent = total;
+            document.getElementById('stat-progreso').textContent = progreso + '%';
+            
+            // Verificar título intermedio (Analista en Informática)
+            checkTituloIntermedio();
+        }
+
+        function checkTituloIntermedio() {
+            // Materias específicas requeridas
+            const materiasRequeridas = [
+                '3.4.210', // Proceso de Desarrollo de Software
+                '3.4.211', // Seminario de Integración Profesional
+                '3.4.212', // Teleinformática y Redes
+                '3.4.213', // Ingeniería de Datos II
+                '3.1.049', // Probabilidad y Estadística
+                '2.4.216'  // Examen de Inglés
+            ];
+            
+            // Verificar 1er año completo
+            const primerAño = materiasData.filter(m => m.año === 1);
+            const primerAñoCompleto = primerAño.every(m => m.estadoUsuario === 'aprobada');
+            
+            // Verificar 2do año completo
+            const segundoAño = materiasData.filter(m => m.año === 2);
+            const segundoAñoCompleto = segundoAño.every(m => m.estadoUsuario === 'aprobada');
+            
+            // Verificar materias específicas
+            const materiasEspecificasCompletas = materiasRequeridas.map(codigo => {
+                const materia = materiasData.find(m => m.codigo === codigo);
+                return {
+                    codigo,
+                    nombre: materia ? materia.nombre : 'Desconocida',
+                    aprobada: materia && materia.estadoUsuario === 'aprobada'
+                };
+            });
+            
+            // Construir lista de requisitos
+            const requisitos = [];
+            
+            if (!primerAñoCompleto) {
+                const faltantes = primerAño.filter(m => m.estadoUsuario !== 'aprobada');
+                requisitos.push(`1° Año completo (faltan ${faltantes.length}: ${faltantes.map(m => m.nombre).join(', ')})`);
+            } else {
+                requisitos.push('✓ 1° Año completo');
+            }
+            
+            if (!segundoAñoCompleto) {
+                const faltantes = segundoAño.filter(m => m.estadoUsuario !== 'aprobada');
+                requisitos.push(`2° Año completo (faltan ${faltantes.length}: ${faltantes.map(m => m.nombre).join(', ')})`);
+            } else {
+                requisitos.push('✓ 2° Año completo');
+            }
+            
+            materiasEspecificasCompletas.forEach(item => {
+                if (!item.aprobada) {
+                    requisitos.push(`${item.nombre}`);
+                } else {
+                    requisitos.push(`✓ ${item.nombre}`);
+                }
+            });
+            
+            // Verificar si cumple todos los requisitos
+            const tieneTitulo = primerAñoCompleto && segundoAñoCompleto && 
+                               materiasEspecificasCompletas.every(m => m.aprobada);
+            
+            const statElement = document.getElementById('stat-titulo-intermedio');
+            statElement.textContent = tieneTitulo ? 'SÍ' : 'NO';
+            statElement.className = tieneTitulo ? 'stat-value si' : 'stat-value no';
+            statElement.parentElement.title = requisitos.join('\n');
+        }
+
+        function exportData() {
+            document.getElementById('dataMenu').style.display = 'none';
+            
+            // Solo exportar lo esencial
+            const estadosMaterias = {};
+            materiasData.forEach(m => {
+                if (m.estadoUsuario && m.estadoUsuario !== 'ninguno') {
+                    estadosMaterias[m.codigo] = m.estadoUsuario;
+                }
+            });
+
+            // Filtrar notas vacías
+            const notasFiltradas = {};
+            Object.keys(materiasNotas).forEach(codigo => {
+                const notaInfo = materiasNotas[codigo];
+                const tieneNotas = notaInfo.notas && notaInfo.notas.trim() !== '';
+                const tieneNotaFinal = notaInfo.notaFinal && notaInfo.notaFinal !== '';
+                
+                if (tieneNotas || tieneNotaFinal) {
+                    notasFiltradas[codigo] = {};
+                    if (tieneNotas) notasFiltradas[codigo].notas = notaInfo.notas;
+                    if (tieneNotaFinal) notasFiltradas[codigo].notaFinal = notaInfo.notaFinal;
+                }
+            });
+
+            const data = {
+                version: '1.0',
+                exportDate: new Date().toISOString(),
+                plan: 'Ingeniería en Informática - Plan 1621',
+                estados: estadosMaterias,
+                notas: notasFiltradas,
+                horarios: horariosSeleccionados,
+                planificacion: planificacion,
+                optativas: optativasSeleccionadas
+            };
+
+            const blob = new Blob([JSON.stringify(data, null, 2)], {type: 'application/json'});
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `uade-arbol-backup-${new Date().toISOString().split('T')[0]}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        function limpiarDatos() {
+            document.getElementById('dataMenu').style.display = 'none';
+            
+            if (!confirm('⚠️ ¿Estás seguro de que quieres eliminar todos los datos?\n\nEsto incluye:\n- Estados de materias\n- Notas y calificaciones\n- Horarios\n- Planificación\n- Optativas seleccionadas\n- Posiciones personalizadas\n\nEsta acción no se puede deshacer.')) {
+                return;
+            }
+
+            // Limpiar localStorage
+            localStorage.removeItem('materiasEstadosUsuario');
+            localStorage.removeItem('materiasNotas');
+            localStorage.removeItem('horarios');
+            localStorage.removeItem('planificacion');
+            localStorage.removeItem('optativasSeleccionadas');
+            localStorage.removeItem('nodePositions');
+
+            alert('✅ Todos los datos han sido eliminados');
+            location.reload();
+        }
+
+        function importData() {
+            document.getElementById('dataMenu').style.display = 'none';
+            
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = 'application/json';
+            input.onchange = (e) => {
+                const file = e.target.files[0];
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    try {
+                        const data = JSON.parse(event.target.result);
+                        const warnings = [];
+                        
+                        // Validar versión
+                        if (!data.version) {
+                            warnings.push('⚠️ Formato de archivo antiguo, intentando importar...');
+                        }
+
+                        // Importar estados de materias
+                        if (data.estados) {
+                            Object.keys(data.estados).forEach(codigo => {
+                                const materia = materiasData.find(m => m.codigo === codigo);
+                                if (materia) {
+                                    const estado = data.estados[codigo];
+                                    if (['ninguno', 'cursando', 'final-previo', 'aprobada'].includes(estado)) {
+                                        materia.estadoUsuario = estado;
+                                    } else {
+                                        warnings.push(`Estado inválido para ${codigo}: ${estado}`);
+                                    }
+                                } else {
+                                    warnings.push(`Materia no encontrada: ${codigo}`);
+                                }
+                            });
+                            saveData();
+                        }
+
+                        // Importar notas
+                        if (data.notas) {
+                            Object.keys(data.notas).forEach(codigo => {
+                                const materia = materiasData.find(m => m.codigo === codigo);
+                                if (materia) {
+                                    const notaInfo = data.notas[codigo];
+                                    if (notaInfo.notaFinal) {
+                                        const nota = parseFloat(notaInfo.notaFinal);
+                                        if (isNaN(nota) || nota < 1 || nota > 10) {
+                                            warnings.push(`Nota inválida para ${codigo}: ${notaInfo.notaFinal}`);
+                                        }
+                                    }
+                                    materiasNotas[codigo] = notaInfo;
+                                } else {
+                                    warnings.push(`Notas para materia no encontrada: ${codigo}`);
+                                }
+                            });
+                            localStorage.setItem('materiasNotas', JSON.stringify(materiasNotas));
+                        }
+
+                        // Importar horarios
+                        if (data.horarios) {
+                            horariosSeleccionados = data.horarios;
+                            localStorage.setItem('horarios', JSON.stringify(horariosSeleccionados));
+                        }
+
+                        // Importar planificación
+                        if (data.planificacion) {
+                            // Validar que las materias existen
+                            const planificacionValida = data.planificacion.map(cuatri => {
+                                const materiasValidas = cuatri.materias.filter(m => {
+                                    const existe = materiasData.find(mat => mat.codigo === m.codigo);
+                                    if (!existe) {
+                                        warnings.push(`Materia en planificación no encontrada: ${m.codigo}`);
+                                    }
+                                    return existe;
+                                });
+                                return { materias: materiasValidas };
+                            });
+                            planificacion = planificacionValida;
+                            localStorage.setItem('planificacion', JSON.stringify(planificacion));
+                        }
+
+                        // Importar optativas
+                        if (data.optativas) {
+                            const optativasValidas = data.optativas.filter(codigo => {
+                                const existe = optativasData.find(opt => opt.codigo === codigo);
+                                if (!existe) {
+                                    warnings.push(`Optativa no encontrada: ${codigo}`);
+                                }
+                                return existe;
+                            });
+                            optativasSeleccionadas = optativasValidas;
+                            localStorage.setItem('optativasSeleccionadas', JSON.stringify(optativasSeleccionadas));
+                        }
+
+                        // Soporte para formato antiguo
+                        if (data.materias && !data.estados) {
+                            warnings.push('⚠️ Formato antiguo detectado. Convirtiendo...');
+                            data.materias.forEach(importedMateria => {
+                                const materia = materiasData.find(m => m.codigo === importedMateria.codigo);
+                                if (materia && importedMateria.estadoUsuario) {
+                                    materia.estadoUsuario = importedMateria.estadoUsuario;
+                                }
+                            });
+                            saveData();
+                        }
+
+                        // Mostrar advertencias si las hay
+                        if (warnings.length > 0) {
+                            alert('Datos importados con advertencias:\\n\\n' + warnings.join('\\n') + '\\n\\nRevisar los datos y exportar nuevamente para limpiar inconsistencias.');
+                        }
+
+                        location.reload();
+                    } catch (error) {
+                        alert('Error al importar datos: ' + error.message);
+                    }
+                };
+                reader.readAsText(file);
+            };
+            input.click();
+        }
+
+        // Cerrar menú contextual al hacer clic fuera
+        document.addEventListener('click', hideContextMenu);
+
+        // Cerrar menú de layout al hacer clic fuera
+        document.addEventListener('click', function(event) {
+            const layoutMenu = document.getElementById('layoutMenu');
+            const layoutButton = event.target.closest('.btn-primary');
+            
+            if (layoutMenu && !layoutMenu.contains(event.target) && !layoutButton) {
+                layoutMenu.style.display = 'none';
+            }
+        });
+
+        // HORARIOS
+        const horarios = {
+            dias: ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'],
+            franjas: [
+                { nombre: 'MAÑANA', horario: '7:30 - 13:30' },
+                { nombre: 'TARDE', horario: '14:00 - 18:00' },
+                { nombre: 'NOCHE', horario: '18:30 - 22:00' }
+            ]
+        };
+
+        function openHorariosModal() {
+            const modal = document.getElementById('horariosModal');
+            modal.style.display = 'block';
+            renderHorariosGrid();
+        }
+
+        function closeHorariosModal() {
+            document.getElementById('horariosModal').style.display = 'none';
+        }
+
+        function renderHorariosGrid() {
+            const grid = document.getElementById('horariosGrid');
+            grid.innerHTML = '';
+
+            // Header vacío
+            grid.innerHTML += '<div class="horario-header"></div>';
+            
+            // Headers de días
+            horarios.dias.forEach(dia => {
+                grid.innerHTML += `<div class="horario-header">${dia}</div>`;
+            });
+
+            // Filas de franjas horarias
+            horarios.franjas.forEach((franja, franjaIdx) => {
+                // Columna de tiempo
+                grid.innerHTML += `
+                    <div class="horario-time">
+                        <strong>${franja.nombre}</strong>
+                        <span style="font-size: 0.8em; margin-top: 4px;">${franja.horario}</span>
+                    </div>
+                `;
+
+                // Celdas por día
+                horarios.dias.forEach((dia, diaIdx) => {
+                    const key = `${diaIdx}-${franjaIdx}`;
+                    const materiasEnCelda = horariosSeleccionados[key] || [];
+                    const hasMateria = materiasEnCelda.length > 0;
+                    
+                    grid.innerHTML += `
+                        <div class="horario-cell ${hasMateria ? 'has-materias' : ''}" id="cell-${key}" onclick="toggleCellSelect('${key}')">
+                            <select class="materia-select" id="select-${key}" onchange="addMateriaToHorario('${key}', this.value); this.value=''; this.classList.remove('active');">
+                                <option value="">Seleccionar materia...</option>
+                                ${getMateriasCursandoOptions()}
+                            </select>
+                            <div style="margin-top: ${hasMateria ? '8px' : '0'};" id="materias-${key}">
+                                ${materiasEnCelda.map(m => `<div class="materia-tag" onclick="event.stopPropagation(); removeMateriaFromHorario('${key}', '${m}');">${m}</div>`).join('')}
+                            </div>
+                        </div>
+                    `;
+                });
+            });
+        }
+
+        function toggleCellSelect(key) {
+            const select = document.getElementById(`select-${key}`);
+            const materiasEnCelda = horariosSeleccionados[key] || [];
+            
+            // Solo permitir selección si no hay materias
+            if (materiasEnCelda.length === 0) {
+                select.classList.add('active');
+                select.focus();
+            }
+        }
+
+        function getMateriasCursandoOptions() {
+            return materiasData
+                .filter(m => m.estadoUsuario === 'cursando')
+                .map(m => `<option value="${m.nombre}">${m.nombre}</option>`)
+                .join('');
+        }
+
+        function addMateriaToHorario(key, materiaNombre) {
+            if (!materiaNombre) return;
+            if (!horariosSeleccionados[key]) {
+                horariosSeleccionados[key] = [];
+            }
+            if (!horariosSeleccionados[key].includes(materiaNombre)) {
+                horariosSeleccionados[key].push(materiaNombre);
+                saveHorarios();
+                renderHorariosGrid();
+            }
+        }
+
+        function removeMateriaFromHorario(key, materiaNombre) {
+            if (horariosSeleccionados[key]) {
+                horariosSeleccionados[key] = horariosSeleccionados[key].filter(m => m !== materiaNombre);
+                if (horariosSeleccionados[key].length === 0) {
+                    delete horariosSeleccionados[key];
+                }
+                saveHorarios();
+                renderHorariosGrid();
+            }
+        }
+
+        function saveHorarios() {
+            localStorage.setItem('horarios', JSON.stringify(horariosSeleccionados));
+        }
+
+        function loadHorarios() {
+            const saved = localStorage.getItem('horarios');
+            if (saved) {
+                horariosSeleccionados = JSON.parse(saved);
+            }
+        }
+
+        // PLANIFICADOR
+        function openPlanificadorModal() {
+            const modal = document.getElementById('planificadorModal');
+            modal.style.display = 'block';
+            renderPlanificador();
+        }
+
+        function closePlanificadorModal() {
+            document.getElementById('planificadorModal').style.display = 'none';
+        }
+
+        function renderPlanificador() {
+            const container = document.getElementById('planificadorContainer');
+            container.innerHTML = '';
+
+            // Verificar si hay materias pendientes (no planificadas aún)
+            const materiasPendientes = getMateriasPendientes();
+            
+            // Limpiar cuatrimestres vacíos al final si no hay materias pendientes
+            while (planificacion.length > 0 && 
+                   planificacion[planificacion.length - 1].materias.length === 0 && 
+                   materiasPendientes.length === 0) {
+                planificacion.pop();
+            }
+            
+            // Asegurar que siempre hay al menos un cuatrimestre vacío SOLO si hay materias para agregar
+            if (planificacion.length === 0) {
+                if (materiasPendientes.length > 0) {
+                    planificacion.push({ materias: [] });
+                }
+            } else if (planificacion[planificacion.length - 1].materias.length > 0 && materiasPendientes.length > 0) {
+                planificacion.push({ materias: [] });
+            }
+
+            planificacion.forEach((cuatri, idx) => {
+                const card = document.createElement('div');
+                card.className = 'cuatrimestre-card';
+                
+                const canAddMore = cuatri.materias.length < 7;
+                const materiasDisponibles = materiasPendientes.filter(m => 
+                    !cuatri.materias.some(cm => cm.codigo === m.codigo)
+                );
+
+                // Verificar si hay materias disponibles para este cuatrimestre específico
+                const hayMateriasParaAgregar = canAddMore && materiasDisponibles.length > 0;
+
+                card.innerHTML = `
+                    <div class="cuatrimestre-header">
+                        <div class="cuatrimestre-title">Cuatrimestre ${idx + 1}</div>
+                        <div style="display: flex; gap: 10px; align-items: center;">
+                            <div class="cuatrimestre-count">${cuatri.materias.length}/7 materias</div>
+                            ${cuatri.materias.length > 0 ? `<button class="btn btn-secondary" style="padding: 4px 8px; font-size: 0.85em;" onclick="deleteCuatrimestre(${idx})">❌ Borrar</button>` : ''}
+                        </div>
+                    </div>
+                    <div class="materias-list">
+                        ${cuatri.materias.map(m => `
+                            <div class="materia-chip">
+                                <span>${m.nombre}</span>
+                                <button class="remove-btn" onclick="removeMateriaFromCuatri(${idx}, '${m.codigo}')">×</button>
+                            </div>
+                        `).join('')}
+                    </div>
+                    ${hayMateriasParaAgregar ? `
+                        <select class="add-materia-select" onchange="addMateriaToCuatri(${idx}, this.value); this.value='';">
+                            <option value="">+ Agregar materia (${7 - cuatri.materias.length} disponibles)</option>
+                            ${materiasDisponibles.map(m => 
+                                `<option value="${m.codigo}">${m.nombre}</option>`
+                            ).join('')}
+                        </select>
+                    ` : ''}
+                `;
+                
+                container.appendChild(card);
+            });
+        }
+
+        function getMateriasPendientes() {
+            return materiasData.filter(m => 
+                m.estadoUsuario !== 'aprobada' && 
+                m.estadoUsuario !== 'cursando' &&
+                m.estadoUsuario !== 'final-previo' &&
+                !planificacion.some(cuatri => 
+                    cuatri.materias.some(cm => cm.codigo === m.codigo)
+                )
+            );
+        }
+
+        function addMateriaToCuatri(cuatriIdx, codigo) {
+            if (!codigo) return;
+            const materia = materiasData.find(m => m.codigo === codigo);
+            if (!materia) return;
+
+            if (planificacion[cuatriIdx].materias.length < 7) {
+                planificacion[cuatriIdx].materias.push({
+                    codigo: materia.codigo,
+                    nombre: materia.nombre
+                });
+                savePlanificacion();
+                renderPlanificador();
+            }
+        }
+
+        function removeMateriaFromCuatri(cuatriIdx, codigo) {
+            planificacion[cuatriIdx].materias = planificacion[cuatriIdx].materias.filter(m => m.codigo !== codigo);
+            
+            // Eliminar cuatrimestres vacíos excepto el último
+            planificacion = planificacion.filter((cuatri, idx) => 
+                cuatri.materias.length > 0 || idx === planificacion.length - 1
+            );
+            
+            savePlanificacion();
+            renderPlanificador();
+        }
+
+        function deleteCuatrimestre(cuatriIdx) {
+            if (confirm(`¿Estás seguro de eliminar el Cuatrimestre ${cuatriIdx + 1}?`)) {
+                planificacion.splice(cuatriIdx, 1);
+                savePlanificacion();
+                renderPlanificador();
+            }
+        }
+
+        function savePlanificacion() {
+            localStorage.setItem('planificacion', JSON.stringify(planificacion));
+        }
+
+        function loadPlanificacion() {
+            const saved = localStorage.getItem('planificacion');
+            if (saved) {
+                planificacion = JSON.parse(saved);
+            }
+        }
+
+        // OPTATIVAS Y MINORS
+        const optativasData = [
+            { codigo: '1.1.030', nombre: 'DIRECCIÓN DE EMPRESAS', correlativas: [], minor: 'DESARROLLO GERENCIAL' },
+            { codigo: '1.1.031', nombre: 'DESARROLLO GERENCIAL', correlativas: [], minor: 'DESARROLLO GERENCIAL' },
+            { codigo: '1.1.082', nombre: 'PLANEAMIENTO Y CONTROL DE GESTIÓN', correlativas: [], minor: 'DESARROLLO GERENCIAL' },
+            { codigo: '1.1.093', nombre: 'LIDERAZGO Y NEGOCIACIÓN', correlativas: [], minor: 'EMPRENDEDURISMO' },
+            { codigo: '1.1.096', nombre: 'SIMULACIONES DE NEGOCIOS', correlativas: [], minor: 'EMPRENDEDURISMO' },
+            { codigo: '1.1.151', nombre: 'LA GESTIÓN EN LA SALUD HUMANA', correlativas: [], minor: 'SALUD' },
+            { codigo: '1.1.157', nombre: 'HERRAMIENTAS INFORMÁTICAS PARA LA GESTIÓN HOSPITALARIA Y SANATORIAL', correlativas: [], minor: 'SALUD' },
+            { codigo: '1.1.158', nombre: 'AUDITORÍA MÉDICA', correlativas: [], minor: 'SALUD' },
+            { codigo: '1.1.164', nombre: 'SISTEMAS INTEGRADOS DE GESTIÓN EMPRESARIAL', correlativas: [], minor: 'EMPRENDEDURISMO' },
+            { codigo: '1.2.001', nombre: 'MARKETING', correlativas: [], minor: 'EMPRENDEDURISMO' },
+            { codigo: '1.2.080', nombre: 'PLATAFORMAS Y NEGOCIOS WEB', correlativas: [], minor: 'EMPRENDEDURISMO' },
+            { codigo: '1.4.044', nombre: 'GESTIÓN FINANCIERA', correlativas: [], minor: 'DESARROLLO GERENCIAL' },
+            { codigo: '1.4.076', nombre: 'FUNDAMENTOS DE ECONOMÍA', correlativas: [], minor: 'DESARROLLO GERENCIAL' },
+            { codigo: '1.4.114', nombre: 'ECONOMÍA DE LA SALUD', correlativas: [], minor: 'SALUD' },
+            { codigo: '2.1.149', nombre: 'GESTIÓN DE POLÍTICAS PÚBLICAS', correlativas: [], minor: 'GOBIERNO DIGITAL' },
+            { codigo: '2.1.153', nombre: 'GESTIÓN DE MUNICIPIOS Y DESARROLLO LOCAL', correlativas: [], minor: 'GOBIERNO DIGITAL' },
+            { codigo: '2.1.154', nombre: 'FINANZAS PÚBLICAS Y ADMINISTRACIÓN PRESUPUESTARIA', correlativas: [], minor: 'GOBIERNO DIGITAL' },
+            { codigo: '2.3.069', nombre: 'DERECHO ADMINISTRATIVO', correlativas: [], minor: 'DERECHO INFORMÁTICO' },
+            { codigo: '2.3.118', nombre: 'ASPECTOS MÉDICOS LEGALES Y BIOÉTICA', correlativas: [], minor: 'SALUD' },
+            { codigo: '2.3.119', nombre: 'PRIVACIDAD Y PROTECCIÓN DE DATOS', correlativas: [], minor: 'DERECHO INFORMÁTICO' },
+            { codigo: '2.3.120', nombre: 'PROPIEDAD INTELECTUAL Y NUEVAS TECNOLOGÍAS', correlativas: [], minor: 'DERECHO INFORMÁTICO' },
+            { codigo: '2.3.121', nombre: 'ASPECTOS LEGALES DE LAS START-UPS TECNOLÓGICAS', correlativas: [], minor: 'DERECHO INFORMÁTICO' },
+            { codigo: '2.3.124', nombre: 'DERECHO DEL CONSUMO EN LA ERA DIGITAL', correlativas: [], minor: 'DERECHO INFORMÁTICO' },
+            { codigo: '2.5.011', nombre: 'TEORÍA DE LA ADMINISTRACIÓN PÚBLICA', correlativas: [], minor: 'GOBIERNO DIGITAL' },
+            { codigo: '2.6.055', nombre: 'TALLER MULTIMEDIA', correlativas: [], minor: 'MEDIOS DIGITALES Y ENTRETENIMIENTO' },
+            { codigo: '2.6.076', nombre: 'LIDERAZGO Y NEGOCIACIÓN', correlativas: [], minor: 'EMPRENDEDURISMO' },
+            { codigo: '2.8.037', nombre: 'TALLER DE PRODUCCIÓN AUDIOVISUAL (TV, RADIO, CINE Y MEDIOS DIGITALES)', correlativas: [], minor: 'MEDIOS DIGITALES Y ENTRETENIMIENTO' },
+            { codigo: '2.8.038', nombre: 'RECURSOS TÉCNICOS DE LA INDUSTRIA DEL ENTRETENIMIENTO', correlativas: [], minor: 'MEDIOS DIGITALES Y ENTRETENIMIENTO' },
+            { codigo: '2.8.042', nombre: 'CONVERGENCIA Y PARADIGMAS TECNOLÓGICOS', correlativas: [], minor: 'COMUNICACIÓN DIGITAL' },
+            { codigo: '2.8.109', nombre: 'MANAGEMENT DE DEPORTES ELECTRÓNICOS Y GAMING', correlativas: [], minor: 'DEPORTES ELECTRÓNICOS' },
+            { codigo: '2.8.153', nombre: 'LABORATORIO DE ENTRETENIMIENTO INMERSIVO Y AUMENTADO', correlativas: [], minor: 'DEPORTES ELECTRÓNICOS' },
+            { codigo: '2.8.165', nombre: 'PRÁCTICA Y ENTRENAMIENTO DE ALTA COMPETENCIA EN ESPORTS: MOBA', correlativas: [], minor: 'DEPORTES ELECTRÓNICOS' },
+            { codigo: '2.8.167', nombre: 'PRÁCTICA Y ENTRENAMIENTO DE ALTA COMPETENCIA EN ESPORTS: FPS', correlativas: [], minor: 'DEPORTES ELECTRÓNICOS' },
+            { codigo: '3.1.021', nombre: 'INVESTIGACIÓN OPERATIVA', correlativas: [], minor: 'MECATRONICA E INDUSTRIA 4.0' },
+            { codigo: '3.1.042', nombre: 'FUNDAMENTOS DE EPIDEMIOLOGÍA, ESTADÍSTICA Y SALUD PÚBLICA', correlativas: [], minor: 'SALUD' },
+            { codigo: '3.2.066', nombre: 'INTRODUCCIÓN A LA ACTIVIDAD AGROPECUARIA', correlativas: [], minor: 'TECNOLOGÍA AGROPECUARIA' },
+            { codigo: '3.2.071', nombre: 'BIOLOGÍA Y FISIOLOGÍA MOLECULAR', correlativas: [], minor: 'BIOTECNOLOGÍA' },
+            { codigo: '3.2.082', nombre: 'MICROBIOLOGÍA GENERAL', correlativas: [], minor: 'BIOTECNOLOGÍA' },
+            { codigo: '3.2.083', nombre: 'GENÉTICA MOLECULAR', correlativas: [], minor: 'BIOTECNOLOGÍA' },
+            { codigo: '3.2.088', nombre: 'BIOINFORMÁTICA', correlativas: [], minor: 'BIOTECNOLOGÍA' },
+            { codigo: '3.2.181', nombre: 'INTRODUCCIÓN A LA BIOLOGÍA MOLECULAR Y CELULAR', correlativas: [], minor: 'BIOTECNOLOGÍA' },
+            { codigo: '3.3.060', nombre: 'SISTEMAS DIGITALES I', correlativas: [], minor: 'SISTEMA DIGITALES - EMBEBIDOS' },
+            { codigo: '3.3.061', nombre: 'SISTEMAS DIGITALES II', correlativas: [], minor: 'SISTEMA DIGITALES - EMBEBIDOS' },
+            { codigo: '3.3.064', nombre: 'COSTOS INDUSTRIALES', correlativas: [], minor: 'MECATRONICA E INDUSTRIA 4.0' },
+            { codigo: '3.3.067', nombre: 'ELECTROTECNIA', correlativas: [], minor: 'ELECTRONICA' },
+            { codigo: '3.3.068', nombre: 'FUNDAMENTOS DE ELECTRÓNICA', correlativas: [], minor: 'SISTEMA DIGITALES - EMBEBIDOS' },
+            { codigo: '3.3.070', nombre: 'ELECTRÓNICA', correlativas: [], minor: 'ELECTRONICA' },
+            { codigo: '3.3.075', nombre: 'PROGRAMACIÓN Y CONTROL DE LA PRODUCCIÓN', correlativas: [], minor: 'MECATRONICA E INDUSTRIA 4.0' },
+            { codigo: '3.3.084', nombre: 'PROCESAMIENTO DE SEÑALES', correlativas: [], minor: 'ELECTRONICA' },
+            { codigo: '3.3.101', nombre: 'INSTALACIONES ELECTROMECÁNICAS', correlativas: [], minor: 'MECATRONICA E INDUSTRIA 4.0' },
+            { codigo: '3.3.104', nombre: 'MÁQUINAS HIDRÁULICAS Y CIRCUITOS TERMOHIDRÁULICOS', correlativas: [], minor: 'MECATRONICA E INDUSTRIA 4.0' },
+            { codigo: '3.3.111', nombre: 'PROCESOS INDUSTRIALES', correlativas: [], minor: 'MECATRONICA E INDUSTRIA 4.0' },
+            { codigo: '3.3.124', nombre: 'TECNOLOGÍA DE LOS MATERIALES ELECTRÓNICOS', correlativas: [], minor: 'ELECTRONICA' },
+            { codigo: '3.3.125', nombre: 'TEORÍA DE LOS CIRCUITOS', correlativas: [], minor: 'ELECTRONICA' },
+            { codigo: '3.3.126', nombre: 'LABORATORIO DE MEDICIONES ELECTRÓNICAS', correlativas: [], minor: 'ELECTRONICA' },
+            { codigo: '3.3.127', nombre: 'SISTEMAS EMBEBIDOS', correlativas: [], minor: 'SISTEMA DIGITALES - EMBEBIDOS' },
+            { codigo: '3.4.085', nombre: 'TELEINFORMÁTICA Y REDES II', correlativas: [], minor: 'REDES' },
+            { codigo: '3.4.131', nombre: 'GESTIÓN DE PERSONAS EN ORGANIZACIONES DE TECNOLOGÍA', correlativas: [], minor: 'DESARROLLO GERENCIAL' },
+            { codigo: '3.4.163', nombre: 'TELEINFORMÁTICA Y REDES III', correlativas: [], minor: 'REDES' },
+            { codigo: '3.4.176', nombre: 'INTRODUCCIÓN AL DISEÑO DE VIDEOJUEGOS', correlativas: [], minor: 'VIDEOJUEGOS' },
+            { codigo: '3.4.180', nombre: 'DISEÑO DE INTERFACES Y UX', correlativas: [], minor: 'UX/UI' },
+            { codigo: '3.4.226', nombre: 'DISEÑO Y DESARROLLO WEB', correlativas: [], minor: 'DESARROLLO WEB' },
+            { codigo: '3.4.228', nombre: 'TESTING DE APLICACIONES', correlativas: [], minor: 'QA' },
+            { codigo: '3.4.241', nombre: 'ACCESO Y CONTROL DE DATOS', correlativas: [], minor: 'BASES DE DATOS' },
+            { codigo: '3.5.005', nombre: 'TECNOLOGÍAS PARA LA FRONTERA AGROPECUARIA', correlativas: [], minor: 'TECNOLOGÍA AGROPECUARIA' },
+            { codigo: '3.5.009', nombre: 'SISTEMAS DE INFORMACIÓN GEOGRÁFICA', correlativas: [], minor: 'TECNOLOGÍA AGROPECUARIA' },
+            { codigo: '3.5.010', nombre: 'INNOVACIONES TECNOLÓGICAS', correlativas: [], minor: 'TECNOLOGÍA AGROPECUARIA' },
+            { codigo: '3.5.014', nombre: 'AGRICULTURA DE PRECISIÓN', correlativas: [], minor: 'TECNOLOGÍA AGROPECUARIA' },
+            { codigo: '4.3.014', nombre: 'ANÁLISIS Y DESARROLLO DE AUDIENCIAS', correlativas: [], minor: 'COMUNICACIÓN DIGITAL' },
+            { codigo: '4.3.016', nombre: 'TALLER DE NARRATIVAS DIGITALES', correlativas: [], minor: 'DEPORTES ELECTRÓNICOS / COMUNICACIÓN DIGITAL' },
+            { codigo: '4.3.022', nombre: 'CIENCIA DE DATOS', correlativas: [], minor: 'COMUNICACIÓN DIGITAL' },
+            { codigo: '4.3.024', nombre: 'TALLER DE PROGRAMACIÓN I', correlativas: [], minor: 'COMUNICACIÓN DIGITAL' },
+            { codigo: '4.3.027', nombre: 'PERIODISMO DE DATOS', correlativas: [], minor: 'COMUNICACIÓN DIGITAL' },
+            { codigo: '4.3.029', nombre: 'TALLER DE PROGRAMACIÓN II', correlativas: [], minor: 'COMUNICACIÓN DIGITAL' },
+            { codigo: '4.3.040', nombre: 'PLATAFORMAS MEDIÁTICAS', correlativas: [], minor: 'COMUNICACIÓN DIGITAL' },
+            { codigo: '4.3.043', nombre: 'MANAGEMENT DE PLATAFORMAS DE ENTRETENIMIENTO', correlativas: [], minor: 'DEPORTES ELECTRÓNICOS' },
+            { codigo: '4.3.047', nombre: 'TALLER DE PROGRAMACIÓN III', correlativas: [], minor: 'COMUNICACIÓN DIGITAL' },
+            { codigo: '4.6.062', nombre: 'TALLER DE RELATO DEPORTIVO', correlativas: [], minor: 'DEPORTES ELECTRÓNICOS' },
+            { codigo: '4.8.001', nombre: 'TECNOLOGÍA DIGITAL PARA EL DISEÑO', correlativas: [], minor: 'MEDIOS DIGITALES Y ENTRETENIMIENTO' },
+            { codigo: '4.8.070', nombre: 'TEORÍA Y PRÁCTICA DEL SONIDO: EDICIÓN DE SONIDO, AUDIO DIGITAL', correlativas: [], minor: 'MEDIOS DIGITALES Y ENTRETENIMIENTO' },
+            { codigo: '4.8.087', nombre: 'SONIDO Y ELABORACIÓN DE BANDA SONORA', correlativas: [], minor: 'MEDIOS DIGITALES Y ENTRETENIMIENTO' },
+            { codigo: '4.8.130', nombre: 'DISEÑO DE EXPERIENCIA DE USUARIO', correlativas: [], minor: 'COMUNICACIÓN DIGITAL' },
+            { codigo: '4.8.155', nombre: 'DISEÑO Y DESARROLLO UX', correlativas: [], minor: 'UX/UI' },
+            { codigo: '6.2.020', nombre: 'DERECHO DEL TRABAJO Y LA SEGURIDAD SOCIAL COMPARADO: LATINOAMÉRICA Y MERCOSUR', correlativas: [], minor: 'DERECHO INFORMÁTICO' },
+            { codigo: 'V1.1.146', nombre: 'CONSULTORÍA', correlativas: [], minor: 'EMPRENDEDURISMO' },
+            { codigo: 'V2.3.003', nombre: 'OBLIGACIONES Y CONTRATOS', correlativas: [], minor: 'EMPRENDEDURISMO' },
+            { codigo: 'V3.1.017', nombre: 'PROGRAMACIÓN OPERATIVA', correlativas: [], minor: 'SALUD' }
+        ];
+
+        function openOptativasModal() {
+            document.getElementById('optativasModal').style.display = 'block';
+            renderOptativas();
+        }
+
+        function closeOptativasModal() {
+            document.getElementById('optativasModal').style.display = 'none';
+        }
+
+        function renderOptativas() {
+            const container = document.getElementById('optativasContainer');
+            
+            // Agrupar por minor
+            const minorsMap = {};
+            optativasData.forEach(opt => {
+                if (!minorsMap[opt.minor]) {
+                    minorsMap[opt.minor] = [];
+                }
+                minorsMap[opt.minor].push(opt);
+            });
+
+            // Ordenar minors alfabéticamente
+            const minors = Object.keys(minorsMap).sort();
+
+            container.innerHTML = minors.map(minor => {
+                const materias = minorsMap[minor];
+                const seleccionadas = materias.filter(m => 
+                    optativasSeleccionadas.includes(m.codigo)
+                ).length;
+                const completado = seleccionadas >= 3;
+
+                return `
+                    <div class="minor-section">
+                        <div class="minor-header">
+                            <div class="minor-title">${minor}</div>
+                            <div class="minor-progress ${completado ? 'completed' : ''}">
+                                ${seleccionadas}/3 materias ${completado ? '✓ Minor Completado' : ''}
+                            </div>
+                        </div>
+                        <div class="optativas-list">
+                            ${materias.map(opt => {
+                                const isSelected = optativasSeleccionadas.includes(opt.codigo);
+                                return `
+                                    <div class="optativa-item ${isSelected ? 'selected' : ''}" onclick="toggleOptativa('${opt.codigo}')">
+                                        <input type="checkbox" 
+                                               class="optativa-checkbox" 
+                                               ${isSelected ? 'checked' : ''}
+                                               onchange="event.stopPropagation(); toggleOptativa('${opt.codigo}')">
+                                        <div class="optativa-info-content">
+                                            <div>
+                                                <span class="optativa-codigo">${opt.codigo}</span>
+                                                <span class="optativa-nombre">${opt.nombre}</span>
+                                            </div>
+                                            ${opt.correlativas.length > 0 ? 
+                                                `<div class="optativa-correlativas">Correlativas: ${opt.correlativas.join(', ')}</div>` 
+                                                : ''}
+                                        </div>
+                                    </div>
+                                `;
+                            }).join('')}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function toggleOptativa(codigo) {
+            const index = optativasSeleccionadas.indexOf(codigo);
+            if (index > -1) {
+                optativasSeleccionadas.splice(index, 1);
+            } else {
+                optativasSeleccionadas.push(codigo);
+            }
+            saveOptativas();
+            renderOptativas();
+        }
+
+        function saveOptativas() {
+            localStorage.setItem('optativasSeleccionadas', JSON.stringify(optativasSeleccionadas));
+        }
+
+        function loadOptativas() {
+            const saved = localStorage.getItem('optativasSeleccionadas');
+            if (saved) {
+                optativasSeleccionadas = JSON.parse(saved);
+            }
+        }
+
+        // MODAL INFORMACIÓN DE MATERIA
+        function openMateriaInfoModal(materiaNode) {
+            const materia = materiasData.find(m => m.codigo === materiaNode.id);
+            if (!materia) return;
+
+            const modal = document.getElementById('materiaInfoModal');
+            const titulo = document.getElementById('materiaInfoTitulo');
+            const content = document.getElementById('materiaInfoContent');
+
+            titulo.textContent = materia.nombre;
+
+            // Obtener correlativas anteriores (prerequisitos)
+            const correlativasAnteriores = materia.correlativas.map(cod => 
+                materiasData.find(m => m.codigo === cod)
+            ).filter(m => m);
+
+            // Obtener correlativas posteriores (materias que requieren esta)
+            const correlativasPosteriores = materiasData.filter(m => 
+                m.correlativas.includes(materia.codigo)
+            );
+
+            // Obtener notas guardadas
+            const notasGuardadas = materiasNotas[materia.codigo] || { notas: '', notaFinal: '' };
+
+            content.innerHTML = `
+                <div class="materia-info-section">
+                    <div class="materia-info-field">
+                        <div class="materia-info-label">Código</div>
+                        <div class="materia-info-value"><span class="codigo-badge">${materia.codigo}</span></div>
+                    </div>
+                    <div class="materia-info-field">
+                        <div class="materia-info-label">Año y Cuatrimestre</div>
+                        <div class="materia-info-value">${materia.año}° Año - ${materia.cuatrimestre}° Cuatrimestre</div>
+                    </div>
+                </div>
+
+                <div class="materia-info-section">
+                    <h3>Estado</h3>
+                    <div class="estado-selector">
+                        <div class="estado-option ${materia.estadoUsuario === 'ninguno' ? 'selected' : ''}" 
+                             onclick="updateMateriaEstadoFromModal('${materia.codigo}', 'ninguno')">
+                            ⚪ Sin Estado
+                        </div>
+                        <div class="estado-option ${materia.estadoUsuario === 'cursando' ? 'selected' : ''}" 
+                             onclick="updateMateriaEstadoFromModal('${materia.codigo}', 'cursando')">
+                            📝 Cursando
+                        </div>
+                        <div class="estado-option ${materia.estadoUsuario === 'final-previo' ? 'selected' : ''}" 
+                             onclick="updateMateriaEstadoFromModal('${materia.codigo}', 'final-previo')">
+                            🔴 Final Previo
+                        </div>
+                        <div class="estado-option ${materia.estadoUsuario === 'aprobada' ? 'selected' : ''}" 
+                             onclick="updateMateriaEstadoFromModal('${materia.codigo}', 'aprobada')">
+                            ✅ Aprobada
+                        </div>
+                    </div>
+                </div>
+
+                ${materia.estadoUsuario === 'aprobada' || materia.estadoUsuario === 'final-previo' ? `
+                    <div class="materia-info-section">
+                        <h3>Nota Final</h3>
+                        <input type="number" 
+                               class="materia-info-input" 
+                               placeholder="Ingrese la nota (1-10)" 
+                               min="1" 
+                               max="10" 
+                               step="0.01"
+                               value="${notasGuardadas.notaFinal || ''}"
+                               onchange="saveNotaFinal('${materia.codigo}', this.value)">
+                    </div>
+                ` : ''}
+
+                ${correlativasAnteriores.length > 0 ? `
+                    <div class="materia-info-section">
+                        <h3>Correlativas Anteriores (Prerequisitos)</h3>
+                        <div>
+                            ${correlativasAnteriores.map(m => 
+                                `<span class="materia-correlativa-tag">${m.codigo} - ${m.nombre}</span>`
+                            ).join('')}
+                        </div>
+                    </div>
+                ` : ''}
+
+                ${correlativasPosteriores.length > 0 ? `
+                    <div class="materia-info-section">
+                        <h3>Correlativas Posteriores (Habilita para)</h3>
+                        <div>
+                            ${correlativasPosteriores.map(m => 
+                                `<span class="materia-correlativa-tag posterior">${m.codigo} - ${m.nombre}</span>`
+                            ).join('')}
+                        </div>
+                    </div>
+                ` : ''}
+
+                <div class="materia-info-section">
+                    <h3>Notas Personales</h3>
+                    <textarea class="materia-info-textarea" 
+                              placeholder="Agrega notas sobre esta materia..."
+                              onchange="saveNotasPersonales('${materia.codigo}', this.value)">${notasGuardadas.notas || ''}</textarea>
+                </div>
+            `;
+
+            modal.style.display = 'block';
+        }
+
+        function closeMateriaInfoModal() {
+            document.getElementById('materiaInfoModal').style.display = 'none';
+        }
+
+        function updateMateriaEstadoFromModal(codigo, nuevoEstado) {
+            const materia = materiasData.find(m => m.codigo === codigo);
+            if (materia) {
+                materia.estadoUsuario = nuevoEstado;
+                saveData();
+                renderGraph();
+                updateStats();
+                // Reabrir modal con datos actualizados
+                const materiaNode = nodes.find(n => n.id === codigo);
+                if (materiaNode) {
+                    openMateriaInfoModal(materiaNode);
+                }
+            }
+        }
+
+        function saveNotasPersonales(codigo, texto) {
+            if (!materiasNotas[codigo]) {
+                materiasNotas[codigo] = {};
+            }
+            materiasNotas[codigo].notas = texto;
+            localStorage.setItem('materiasNotas', JSON.stringify(materiasNotas));
+        }
+
+        function saveNotaFinal(codigo, nota) {
+            if (!materiasNotas[codigo]) {
+                materiasNotas[codigo] = {};
+            }
+            materiasNotas[codigo].notaFinal = nota;
+            localStorage.setItem('materiasNotas', JSON.stringify(materiasNotas));
+            updateStats();
+        }
+
+        function loadMateriasNotas() {
+            const saved = localStorage.getItem('materiasNotas');
+            if (saved) {
+                materiasNotas = JSON.parse(saved);
+            }
+        }
+
+        // Cerrar modales al hacer clic fuera
+        window.onclick = function(event) {
+            const horariosModal = document.getElementById('horariosModal');
+            const planificadorModal = document.getElementById('planificadorModal');
+            const optativasModal = document.getElementById('optativasModal');
+            const materiaInfoModal = document.getElementById('materiaInfoModal');
+            if (event.target == horariosModal) {
+                closeHorariosModal();
+            }
+            if (event.target == planificadorModal) {
+                closePlanificadorModal();
+            }
+            if (event.target == optativasModal) {
+                closeOptativasModal();
+            }
+            if (event.target == materiaInfoModal) {
+                closeMateriaInfoModal();
+            }
+        }
+
+        // Inicializar al cargar la página
+        window.addEventListener('load', () => {
+            // Limpiar posiciones guardadas viejas para forzar nuevo layout
+            localStorage.removeItem('nodePositions');
+            loadHorarios();
+            loadPlanificacion();
+            loadOptativas();
+            loadMateriasNotas();
+            initGraph();
+        });
+        
+        window.addEventListener('resize', () => {
+            location.reload();
+        });
+    </script>
+</body>
+</html>
