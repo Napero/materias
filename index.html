@@ -6,6 +6,7 @@
     <title>Árbol de Materias - Ingeniería en Informática</title>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='0.9em' font-size='90'>🎓</text></svg>">
     <script src="https://d3js.org/d3.v7.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <style>
         * {
             margin: 0;
@@ -239,6 +240,27 @@
             border-color: #606060;
         }
 
+        .icon {
+            margin-right: 6px;
+            vertical-align: -0.125em;
+        }
+
+        .icon-status-neutral {
+            color: #adb5bd;
+        }
+
+        .icon-status-inprogress {
+            color: #17a2b8;
+        }
+
+        .icon-status-danger {
+            color: #dc3545;
+        }
+
+        .icon-status-success {
+            color: #28a745;
+        }
+
         .layout-menu {
             position: absolute;
             top: 45px;
@@ -285,6 +307,18 @@
             box-shadow: 0 4px 12px rgba(0,0,0,0.3);
             z-index: 1000;
             min-width: 200px;
+        }
+
+        .tools-menu {
+            position: absolute;
+            top: 45px;
+            left: 280px;
+            background: #2d2d2d;
+            border: 1px solid #505050;
+            border-radius: 4px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            z-index: 1000;
+            min-width: 230px;
         }
 
         .info-modal {
@@ -469,6 +503,24 @@
 
         .node:hover {
             filter: brightness(1.1);
+        }
+
+        .node.search-selected circle {
+            stroke: #4fc3f7;
+            stroke-width: 4px;
+            filter: drop-shadow(0 0 8px rgba(79, 195, 247, 0.7));
+        }
+
+        .node.search-match circle {
+            stroke: #ffd166;
+            stroke-width: 3px;
+            filter: drop-shadow(0 0 5px rgba(255, 209, 102, 0.6));
+        }
+
+        .node.search-primary circle {
+            stroke: #ff9f1c;
+            stroke-width: 4px;
+            filter: drop-shadow(0 0 9px rgba(255, 159, 28, 0.8));
         }
 
         .node.highlighted circle {
@@ -709,6 +761,23 @@
             display: flex;
             flex-direction: column;
             gap: 20px;
+        }
+
+        .planificador-tools {
+            background: #303030;
+            border: 1px solid #505050;
+            border-radius: 8px;
+            padding: 14px;
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+        }
+
+        .planificador-tools-note {
+            color: #a7a7a7;
+            font-size: 0.9em;
         }
 
         .cuatrimestre-card {
@@ -1013,6 +1082,96 @@
         .estado-falta-cursada-correlativa { fill: #524360; }
         .estado-puedo-inscribirme { fill: #37685d; }
         .estado-sin-estado { fill: #4a4a4a; }
+
+        .search-spotlight {
+            display: none;
+            position: fixed;
+            inset: 0;
+            z-index: 3100;
+            background: transparent;
+            align-items: flex-start;
+            justify-content: center;
+            padding-top: 20px;
+        }
+
+        .search-spotlight-box {
+            width: min(720px, 94vw);
+            background: rgba(31, 31, 31, 0.94);
+            border: 1px solid #505050;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
+            overflow: hidden;
+        }
+
+        .search-spotlight-input-wrap {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 14px;
+            border-bottom: 1px solid #404040;
+            background: #252525;
+        }
+
+        .search-spotlight-input {
+            flex: 1;
+            background: transparent;
+            border: none;
+            color: #f1f1f1;
+            font-size: 1.05em;
+            outline: none;
+        }
+
+        .search-spotlight-kbd {
+            color: #b0b0b0;
+            border: 1px solid #505050;
+            border-bottom-width: 2px;
+            border-radius: 6px;
+            padding: 2px 6px;
+            font-size: 0.75em;
+            background: #2d2d2d;
+        }
+
+        .search-spotlight-meta {
+            color: #9a9a9a;
+            font-size: 0.85em;
+            padding: 8px 14px;
+            background: #222;
+        }
+
+        .filter-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 10px;
+            margin-bottom: 16px;
+        }
+
+        .filter-option {
+            background: #353535;
+            border: 1px solid #505050;
+            border-radius: 6px;
+            padding: 10px 12px;
+            color: #e0e0e0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .filter-option input {
+            width: 16px;
+            height: 16px;
+        }
+
+        .filter-actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .tools-note {
+            color: #909090;
+            font-size: 0.85em;
+            margin-top: 12px;
+        }
     </style>
 </head>
 <body>
@@ -1020,7 +1179,7 @@
         <div class="header">
             <div class="header-left">
                 <div class="header-title">
-                    <h1>🎓 Árbol de Materias FAIN UADE</h1>
+                    <h1><i class="bi bi-mortarboard-fill icon" aria-hidden="true"></i>Árbol de Materias FAIN UADE</h1>
                     <p>Ingeniería en Informática - Plan 1621 - Año 2021</p>
                 </div>
                 <button class="info-button" onclick="toggleInfoModal()" title="Ayuda">?</button>
@@ -1055,22 +1214,29 @@
 
         <div class="controls">
             <div class="controls-left">
-                <button class="btn btn-primary" onclick="toggleLayoutMenu()">🔄 Reordenar ▼</button>
+                <button class="btn btn-primary" onclick="toggleLayoutMenu(this)"><i class="bi bi-arrow-repeat icon" aria-hidden="true"></i>Reordenar ▼</button>
                 <div id="layoutMenu" class="layout-menu" style="display: none;">
-                    <div class="layout-option" onclick="resetLayout('cuatrimestre')">📅 Por Cuatrimestre</div>
-                    <div class="layout-option" onclick="resetLayout('ramas')">🌳 Por Ramas de Correlatividad</div>
+                    <div class="layout-option" onclick="resetLayout('cuatrimestre')"><i class="bi bi-calendar3 icon" aria-hidden="true"></i>Por Cuatrimestre</div>
+                    <div class="layout-option" onclick="resetLayout('ramas')"><i class="bi bi-diagram-3-fill icon" aria-hidden="true"></i>Por Ramas de Correlatividad</div>
+                    <div id="layoutPlanificacionOption" class="layout-option" style="display: none;" onclick="resetLayout('planificacion')"><i class="bi bi-list-task icon" aria-hidden="true"></i>Según Planeamiento</div>
                 </div>
-                <button class="btn btn-secondary" onclick="toggleDataMenu()">💾 Datos ▼</button>
+                <button class="btn btn-secondary" onclick="toggleDataMenu(this)"><i class="bi bi-database-fill icon" aria-hidden="true"></i>Datos ▼</button>
                 <div id="dataMenu" class="data-menu" style="display: none;">
-                    <div class="layout-option" onclick="exportData()">💾 Exportar Datos</div>
-                    <div class="layout-option" onclick="importData()">📥 Importar Datos</div>
-                    <div class="layout-option danger" onclick="limpiarDatos()">🗑️ Limpiar Todo</div>
+                    <div class="layout-option" onclick="exportData()"><i class="bi bi-download icon" aria-hidden="true"></i>Exportar Datos</div>
+                    <div class="layout-option" onclick="importData()"><i class="bi bi-upload icon" aria-hidden="true"></i>Importar Datos</div>
+                    <div class="layout-option danger" onclick="limpiarDatos()"><i class="bi bi-trash3-fill icon" aria-hidden="true"></i>Limpiar Todo</div>
+                </div>
+                <button class="btn btn-secondary" onclick="toggleToolsMenu(this)"><i class="bi bi-tools icon" aria-hidden="true"></i>Herramientas ▼</button>
+                <div id="toolsMenu" class="tools-menu" style="display: none;">
+                    <div class="layout-option" onclick="openSearchModal()"><i class="bi bi-search icon" aria-hidden="true"></i>Buscar Materia</div>
+                    <div class="layout-option" onclick="openStatusFilterModal()"><i class="bi bi-funnel-fill icon" aria-hidden="true"></i>Filtrar por Estado</div>
+                    <div class="layout-option" onclick="exportGraphToPNG()"><i class="bi bi-image-fill icon" aria-hidden="true"></i>Exportar PNG (HD)</div>
                 </div>
             </div>
             <div class="controls-right">
-                <button class="btn btn-secondary" onclick="openHorariosModal()">📅 Ver Horarios</button>
-                <button class="btn btn-secondary" onclick="openPlanificadorModal()">📋 Planificador</button>
-                <button class="btn btn-secondary" onclick="openOptativasModal()">📚 Optativas</button>
+                <button class="btn btn-secondary" onclick="openHorariosModal()"><i class="bi bi-calendar3 icon" aria-hidden="true"></i>Ver Horarios</button>
+                <button class="btn btn-secondary" onclick="openPlanificadorModal()"><i class="bi bi-clipboard2-check-fill icon" aria-hidden="true"></i>Planificador</button>
+                <button class="btn btn-secondary" onclick="openOptativasModal()"><i class="bi bi-journal-bookmark-fill icon" aria-hidden="true"></i>Optativas</button>
             </div>
         </div>
 
@@ -1078,20 +1244,20 @@
     </div>
 
     <div class="context-menu" id="contextMenu">
-        <div class="context-menu-item" onclick="setUserStatus('ninguno')">⚪ Sin estado</div>
-        <div class="context-menu-item" onclick="setUserStatus('cursando')">📝 Cursando</div>
-        <div class="context-menu-item" onclick="setUserStatus('final-previo')">🔴 Final Previo</div>
-        <div class="context-menu-item" onclick="setUserStatus('aprobada')">✅ Aprobada</div>
+        <div class="context-menu-item" onclick="setUserStatus('ninguno')"><i class="bi bi-circle icon icon-status-neutral" aria-hidden="true"></i>Sin estado</div>
+        <div class="context-menu-item" onclick="setUserStatus('cursando')"><i class="bi bi-pencil-square icon icon-status-inprogress" aria-hidden="true"></i>Cursando</div>
+        <div class="context-menu-item" onclick="setUserStatus('final-previo')"><i class="bi bi-record-circle-fill icon icon-status-danger" aria-hidden="true"></i>Final Previo</div>
+        <div class="context-menu-item" onclick="setUserStatus('aprobada')"><i class="bi bi-check-circle-fill icon icon-status-success" aria-hidden="true"></i>Aprobada</div>
     </div>
 
     <div class="info-modal" id="infoModal" onclick="closeInfoModal(event)">
         <div class="info-modal-content" onclick="event.stopPropagation()">
-            <h2>📖 Guía de Uso</h2>
+            <h2><i class="bi bi-book-fill icon" aria-hidden="true"></i>Guía de Uso</h2>
             
-            <h3>🔒 Privacidad</h3>
+            <h3><i class="bi bi-shield-lock-fill icon" aria-hidden="true"></i>Privacidad</h3>
             <p>Tu progreso es <strong>100% privado</strong>. Todo se guarda en el localStorage de tu navegador (local en tu PC). Nadie más puede ver tus datos.</p>
             
-            <h3>🎯 Cómo usar</h3>
+            <h3><i class="bi bi-bullseye icon" aria-hidden="true"></i>Cómo usar</h3>
             <ul>
                 <li><strong>Click derecho en una materia</strong> → Cambiar estado (cursando, final previo, aprobada)</li>
                 <li><strong>Click izquierdo</strong> → Ver info detallada, agregar notas y calificación (Ctrl + Click izquierdo funciona mejor)</li>
@@ -1099,29 +1265,29 @@
                 <li><strong>Hover sobre materia</strong> → Ver correlativas resaltadas</li>
             </ul>
             
-            <h3>🔄 Reordenar</h3>
+            <h3><i class="bi bi-arrow-repeat icon" aria-hidden="true"></i>Reordenar</h3>
             <ul>
                 <li><strong>Por Cuatrimestre</strong> → Organiza en columnas por año/cuatrimestre</li>
                 <li><strong>Por Ramas</strong> → Organiza según dependencias entre materias</li>
             </ul>
             
-            <h3>💾 Datos</h3>
+            <h3><i class="bi bi-database-fill icon" aria-hidden="true"></i>Datos</h3>
             <ul>
                 <li><strong>Exportar</strong> → Descarga un JSON con todo tu progreso</li>
                 <li><strong>Importar</strong> → Carga un backup previo (valida automáticamente)</li>
                 <li><strong>Limpiar</strong> → Elimina todos los datos (requiere confirmación)</li>
             </ul>
             
-            <h3>📅 Ver Horarios</h3>
+            <h3><i class="bi bi-calendar3 icon" aria-hidden="true"></i>Ver Horarios</h3>
             <p>Planificá tu cursada semanal. Marcá los horarios de cada materia en una grilla.</p>
             
-            <h3>📋 Planificador</h3>
+            <h3><i class="bi bi-clipboard2-check-fill icon" aria-hidden="true"></i>Planificador</h3>
             <p>Organizá qué materias vas a cursar en futuros cuatrimestres. Arrastra materias entre columnas.</p>
             
-            <h3>📚 Optativas</h3>
+            <h3><i class="bi bi-journal-bookmark-fill icon" aria-hidden="true"></i>Optativas</h3>
             <p>Elegí tus 6 optativas entre 89 materias organizadas en 26 orientaciones. Las seleccionadas aparecen en el árbol.</p>
             
-            <h3>📊 Estadísticas</h3>
+            <h3><i class="bi bi-bar-chart-fill icon" aria-hidden="true"></i>Estadísticas</h3>
             <ul>
                 <li><strong>Aprobadas/Inscriptas/Pendientes</strong> → Tu progreso actual</li>
                 <li><strong>Título Intermedio</strong> → ¿Cumplís los requisitos? (hover para ver detalles)</li>
@@ -1135,7 +1301,7 @@
     <div id="horariosModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h2>📅 Horarios del Cuatrimestre</h2>
+                <h2><i class="bi bi-calendar3 icon" aria-hidden="true"></i>Horarios del Cuatrimestre</h2>
                 <span class="close" onclick="closeHorariosModal()">&times;</span>
             </div>
             <div class="modal-body">
@@ -1148,7 +1314,7 @@
     <div id="planificadorModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h2>📋 Planificador de Cuatrimestres</h2>
+                <h2><i class="bi bi-clipboard2-check-fill icon" aria-hidden="true"></i>Planificador de Cuatrimestres</h2>
                 <span class="close" onclick="closePlanificadorModal()">&times;</span>
             </div>
             <div class="modal-body">
@@ -1161,7 +1327,7 @@
     <div id="optativasModal" class="modal">
         <div class="modal-content" style="max-width: 1200px;">
             <div class="modal-header">
-                <h2>📚 Materias Optativas y Minors</h2>
+                <h2><i class="bi bi-journal-bookmark-fill icon" aria-hidden="true"></i>Materias Optativas y Minors</h2>
                 <span class="close" onclick="closeOptativasModal()">&times;</span>
             </div>
             <div class="modal-body">
@@ -1183,6 +1349,53 @@
             </div>
             <div class="modal-body">
                 <div id="materiaInfoContent"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Spotlight Buscar -->
+    <div id="searchModal" class="search-spotlight" onclick="closeSearchModalFromOverlay(event)">
+        <div class="search-spotlight-box">
+            <div class="search-spotlight-input-wrap">
+                <i class="bi bi-search" aria-hidden="true"></i>
+                <input id="searchMateriaInput" class="search-spotlight-input" type="text" placeholder="Buscar por nombre o código..." oninput="renderSearchResults(this.value)" onkeydown="handleSearchInputKeydown(event)" autocomplete="off" spellcheck="false">
+                <span class="search-spotlight-kbd">ESC</span>
+            </div>
+            <div id="searchMeta" class="search-spotlight-meta">Escribí para buscar. Las coincidencias se marcan en el grafo en tiempo real.</div>
+        </div>
+    </div>
+
+    <!-- Modal Filtros -->
+    <div id="statusFilterModal" class="modal">
+        <div class="modal-content" style="max-width: 760px;">
+            <div class="modal-header">
+                <h2><i class="bi bi-funnel-fill icon" aria-hidden="true"></i>Filtrar por Estado</h2>
+                <span class="close" onclick="closeStatusFilterModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="filter-grid">
+                    <label class="filter-option">
+                        <input type="checkbox" id="filter-ninguno" value="ninguno">
+                        <span><i class="bi bi-circle icon icon-status-neutral" aria-hidden="true"></i>Sin Estado</span>
+                    </label>
+                    <label class="filter-option">
+                        <input type="checkbox" id="filter-cursando" value="cursando">
+                        <span><i class="bi bi-pencil-square icon icon-status-inprogress" aria-hidden="true"></i>Cursando</span>
+                    </label>
+                    <label class="filter-option">
+                        <input type="checkbox" id="filter-final-previo" value="final-previo">
+                        <span><i class="bi bi-record-circle-fill icon icon-status-danger" aria-hidden="true"></i>Final Previo</span>
+                    </label>
+                    <label class="filter-option">
+                        <input type="checkbox" id="filter-aprobada" value="aprobada">
+                        <span><i class="bi bi-check-circle-fill icon icon-status-success" aria-hidden="true"></i>Aprobada</span>
+                    </label>
+                </div>
+                <div class="filter-actions">
+                    <button class="btn btn-primary" onclick="applyStatusFiltersFromModal()">Aplicar Filtros</button>
+                    <button class="btn btn-secondary" onclick="resetStatusFilters()">Mostrar Todo</button>
+                </div>
+                <div class="tools-note">El filtro oculta nodos y conexiones según el estado seleccionado.</div>
             </div>
         </div>
     </div>
@@ -1267,15 +1480,38 @@
         let nodes = [];
         let links = [];
         let simulation;
-        let svg, g, link, node;
+        let svg, g, link, node, zoomBehavior;
         let selectedNode = null;
         let isDragging = false;
         let horariosSeleccionados = {};
         let planificacion = [];
         let optativasSeleccionadas = [];
         let materiasNotas = {}; // {codigo: {notas: "texto", notaFinal: 8}}
+        let activeStatusFilters = new Set(['ninguno', 'cursando', 'final-previo', 'aprobada']);
+        let currentSearchMatches = [];
+        let currentSearchIndex = 0;
+        const PLAN_MAX_MATERIAS_POR_CUATRI = 7;
+        const CODIGO_EXAMEN_INGLES = '2.4.216';
+        const CODIGO_PPS = 'PPS06';
+        const CODIGO_PROYECTO_FINAL = '3.4.100';
         const width = window.innerWidth;
         const height = window.innerHeight - 150;
+
+        function getCodigoMateria(materiaOrCodigo) {
+            return typeof materiaOrCodigo === 'string' ? materiaOrCodigo : materiaOrCodigo?.codigo;
+        }
+
+        function isExamenIngles(materiaOrCodigo) {
+            return getCodigoMateria(materiaOrCodigo) === CODIGO_EXAMEN_INGLES;
+        }
+
+        function consumesHardCupo(materiaOrCodigo) {
+            return !isExamenIngles(materiaOrCodigo);
+        }
+
+        function countHardCupoMaterias(materias = []) {
+            return (materias || []).filter(m => consumesHardCupo(m)).length;
+        }
 
         // Cargar datos guardados del localStorage
         function loadSavedData() {
@@ -1355,13 +1591,18 @@
             return { estado: 'Sin estado', clase: 'estado-sin-estado' };
         }
 
+        function getMateriaActual(materiaRef) {
+            const codigo = materiaRef.id || materiaRef.codigo;
+            return materiasData.find(m => m.codigo === codigo) || materiaRef;
+        }
+
         // Normalizar estados para clases CSS
         function getEstadoClass(materia) {
-            return calcularEstadoReal(materia).clase;
+            return calcularEstadoReal(getMateriaActual(materia)).clase;
         }
 
         function getEstadoTexto(materia) {
-            return calcularEstadoReal(materia).estado;
+            return calcularEstadoReal(getMateriaActual(materia)).estado;
         }
 
         // Inicializar el grafo
@@ -1457,13 +1698,13 @@
                 .attr("height", height);
 
             // Agregar zoom
-            const zoom = d3.zoom()
+            zoomBehavior = d3.zoom()
                 .scaleExtent([0.3, 3])
                 .on("zoom", (event) => {
                     g.attr("transform", event.transform);
                 });
 
-            svg.call(zoom);
+            svg.call(zoomBehavior);
 
             g = svg.append("g");
 
@@ -1551,6 +1792,7 @@
 
             // Actualizar posiciones de links
             updateLinks();
+            applyStatusFilter();
         }
 
         function updateLinks() {
@@ -1694,6 +1936,12 @@
                 if (materia) {
                     materia.estadoUsuario = newStatus;
                 }
+
+                // Mantener sincronizado el nodo del grafo
+                const nodeRef = nodes.find(n => n.id === selectedNode.id);
+                if (nodeRef) {
+                    nodeRef.estadoUsuario = newStatus;
+                }
                 
                 // Actualizar todos los nodos (porque otros pueden cambiar de estado)
                 d3.selectAll('.node')
@@ -1706,6 +1954,7 @@
                 
                 saveData();
                 updateStats();
+                applyStatusFilter();
             }
             hideContextMenu();
         }
@@ -1715,18 +1964,63 @@
             selectedNode = null;
         }
 
-        function toggleLayoutMenu() {
-            const menu = document.getElementById('layoutMenu');
-            const dataMenu = document.getElementById('dataMenu');
-            dataMenu.style.display = 'none';
-            menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
+        function positionDropdownMenu(triggerButton, menuElement) {
+            const controlsLeft = document.querySelector('.controls-left');
+            if (!controlsLeft || !triggerButton || !menuElement) return;
+            const buttonRect = triggerButton.getBoundingClientRect();
+            const containerRect = controlsLeft.getBoundingClientRect();
+            menuElement.style.left = `${Math.round(buttonRect.left - containerRect.left)}px`;
         }
 
-        function toggleDataMenu() {
-            const menu = document.getElementById('dataMenu');
+        function hideDropdownMenus() {
             const layoutMenu = document.getElementById('layoutMenu');
-            layoutMenu.style.display = 'none';
-            menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
+            const dataMenu = document.getElementById('dataMenu');
+            const toolsMenu = document.getElementById('toolsMenu');
+            if (layoutMenu) layoutMenu.style.display = 'none';
+            if (dataMenu) dataMenu.style.display = 'none';
+            if (toolsMenu) toolsMenu.style.display = 'none';
+        }
+
+        function hasPlanificacionCargada() {
+            return Array.isArray(planificacion) &&
+                planificacion.some(cuatri => Array.isArray(cuatri.materias) && cuatri.materias.length > 0);
+        }
+
+        function updateLayoutMenuOptions() {
+            const option = document.getElementById('layoutPlanificacionOption');
+            if (!option) return;
+            option.style.display = hasPlanificacionCargada() ? 'block' : 'none';
+        }
+
+        function toggleLayoutMenu(triggerButton) {
+            const menu = document.getElementById('layoutMenu');
+            const shouldOpen = menu.style.display === 'none';
+            hideDropdownMenus();
+            if (shouldOpen) {
+                updateLayoutMenuOptions();
+                positionDropdownMenu(triggerButton, menu);
+                menu.style.display = 'block';
+            }
+        }
+
+        function toggleDataMenu(triggerButton) {
+            const menu = document.getElementById('dataMenu');
+            const shouldOpen = menu.style.display === 'none';
+            hideDropdownMenus();
+            if (shouldOpen) {
+                positionDropdownMenu(triggerButton, menu);
+                menu.style.display = 'block';
+            }
+        }
+
+        function toggleToolsMenu(triggerButton) {
+            const menu = document.getElementById('toolsMenu');
+            const shouldOpen = menu.style.display === 'none';
+            hideDropdownMenus();
+            if (shouldOpen) {
+                positionDropdownMenu(triggerButton, menu);
+                menu.style.display = 'block';
+            }
         }
 
         function toggleInfoModal() {
@@ -1744,9 +2038,284 @@
             }
         }
 
+        function normalizeText(value) {
+            return (value || '')
+                .toString()
+                .normalize('NFD')
+                .replace(/[\u0300-\u036f]/g, '')
+                .toLowerCase();
+        }
+
+        function applyStatusFilter() {
+            if (!node || !link) return;
+
+            const hiddenNodeIds = new Set();
+            node.style('display', d => {
+                const materia = materiasData.find(m => m.codigo === d.id);
+                const estado = materia ? materia.estadoUsuario : 'ninguno';
+                const isVisible = activeStatusFilters.has(estado);
+                if (!isVisible) {
+                    hiddenNodeIds.add(d.id);
+                }
+                return isVisible ? null : 'none';
+            });
+
+            link.style('display', l => {
+                const sourceId = l.source.id || l.source;
+                const targetId = l.target.id || l.target;
+                const isVisible = !hiddenNodeIds.has(sourceId) && !hiddenNodeIds.has(targetId);
+                return isVisible ? null : 'none';
+            });
+        }
+
+        function openSearchModal() {
+            hideDropdownMenus();
+            const modal = document.getElementById('searchModal');
+            const input = document.getElementById('searchMateriaInput');
+            modal.style.display = 'flex';
+            input.value = '';
+            currentSearchMatches = [];
+            currentSearchIndex = 0;
+            clearSearchHighlights();
+            renderSearchResults('');
+            setTimeout(() => input.focus(), 10);
+        }
+
+        function closeSearchModal() {
+            document.getElementById('searchModal').style.display = 'none';
+            const input = document.getElementById('searchMateriaInput');
+            if (input) input.value = '';
+            currentSearchMatches = [];
+            currentSearchIndex = 0;
+            clearSearchHighlights();
+        }
+
+        function closeSearchModalFromOverlay(event) {
+            if (event.target && event.target.id === 'searchModal') {
+                closeSearchModal();
+            }
+        }
+
+        function clearSearchHighlights() {
+            d3.selectAll('.node')
+                .classed('search-match', false)
+                .classed('search-primary', false);
+        }
+
+        function updateSearchHighlights(matches) {
+            const matchSet = new Set(matches.map(m => m.codigo));
+            const primaryCodigo = matches[currentSearchIndex]?.codigo;
+
+            d3.selectAll('.node')
+                .classed('search-match', d => matchSet.has(d.id))
+                .classed('search-primary', d => d.id === primaryCodigo);
+        }
+
+        function updateSearchMeta(total, queryNorm, firstMatch = null) {
+            const meta = document.getElementById('searchMeta');
+            if (!meta) return;
+
+            if (!queryNorm) {
+                meta.textContent = 'Escribí para buscar. Las coincidencias se marcan en el grafo en tiempo real.';
+                return;
+            }
+
+            if (total === 0) {
+                meta.textContent = 'Sin resultados para la búsqueda actual.';
+                return;
+            }
+
+            meta.textContent = `${total} coincidencia${total === 1 ? '' : 's'} marcada${total === 1 ? '' : 's'} en el grafo. Primera: ${firstMatch.codigo} - ${firstMatch.nombre}. Enter para enfocar.`;
+        }
+
+        function renderSearchResults(query) {
+            const queryNorm = normalizeText(query).trim();
+
+            if (!queryNorm) {
+                updateSearchMeta(0, '');
+                clearSearchHighlights();
+                currentSearchMatches = [];
+                currentSearchIndex = 0;
+                return;
+            }
+
+            const results = materiasData
+                .filter(m => {
+                    return normalizeText(m.nombre).includes(queryNorm) || normalizeText(m.codigo).includes(queryNorm);
+                })
+                .sort((a, b) => a.año - b.año || a.cuatrimestre - b.cuatrimestre || a.nombre.localeCompare(b.nombre, 'es'))
+                .slice(0, 80);
+
+            currentSearchMatches = results;
+            currentSearchIndex = 0;
+            updateSearchMeta(results.length, queryNorm, results[0]);
+            updateSearchHighlights(results);
+        }
+
+        function focusOnMateria(codigo) {
+            const targetNode = nodes.find(n => n.id === codigo);
+            if (!targetNode) return;
+
+            if (svg && zoomBehavior) {
+                const scale = 1.6;
+                const transform = d3.zoomIdentity
+                    .translate((width / 2) - (targetNode.x * scale), (height / 2) - (targetNode.y * scale))
+                    .scale(scale);
+
+                svg.transition()
+                    .duration(600)
+                    .call(zoomBehavior.transform, transform);
+            }
+
+            d3.selectAll('.node').classed('search-selected', d => d.id === codigo);
+            setTimeout(() => {
+                d3.selectAll('.node').classed('search-selected', false);
+            }, 2200);
+        }
+
+        function handleSearchInputKeydown(event) {
+            if (event.key === 'Escape') {
+                event.preventDefault();
+                closeSearchModal();
+                return;
+            }
+
+            if (event.key === 'Enter') {
+                event.preventDefault();
+                if (currentSearchMatches.length > 0) {
+                    const selected = currentSearchMatches[0];
+                    focusMateriaFromSearch(selected.codigo);
+                }
+            }
+        }
+
+        function focusMateriaFromSearch(codigo) {
+            const materia = materiasData.find(m => m.codigo === codigo);
+            if (!materia) return;
+
+            if (!activeStatusFilters.has(materia.estadoUsuario)) {
+                activeStatusFilters = new Set(['ninguno', 'cursando', 'final-previo', 'aprobada']);
+                applyStatusFilter();
+            }
+
+            closeSearchModal();
+            focusOnMateria(codigo);
+        }
+
+        function openStatusFilterModal() {
+            hideDropdownMenus();
+            const modal = document.getElementById('statusFilterModal');
+            const estados = ['ninguno', 'cursando', 'final-previo', 'aprobada'];
+
+            estados.forEach(estado => {
+                const checkbox = document.getElementById(`filter-${estado}`);
+                if (checkbox) {
+                    checkbox.checked = activeStatusFilters.has(estado);
+                }
+            });
+
+            modal.style.display = 'block';
+        }
+
+        function closeStatusFilterModal() {
+            document.getElementById('statusFilterModal').style.display = 'none';
+        }
+
+        function applyStatusFiltersFromModal() {
+            const estados = ['ninguno', 'cursando', 'final-previo', 'aprobada'];
+            const nuevosFiltros = estados.filter(estado => {
+                const checkbox = document.getElementById(`filter-${estado}`);
+                return checkbox && checkbox.checked;
+            });
+
+            if (nuevosFiltros.length === 0) {
+                alert('Selecciona al menos un estado para aplicar el filtro.');
+                return;
+            }
+
+            activeStatusFilters = new Set(nuevosFiltros);
+            applyStatusFilter();
+            closeStatusFilterModal();
+        }
+
+        function resetStatusFilters() {
+            activeStatusFilters = new Set(['ninguno', 'cursando', 'final-previo', 'aprobada']);
+            applyStatusFilter();
+
+            ['ninguno', 'cursando', 'final-previo', 'aprobada'].forEach(estado => {
+                const checkbox = document.getElementById(`filter-${estado}`);
+                if (checkbox) checkbox.checked = true;
+            });
+        }
+
+        function exportGraphToPNG() {
+            hideDropdownMenus();
+
+            const graphSvg = document.getElementById('graph');
+            if (!graphSvg) {
+                alert('No se encontró el gráfico para exportar.');
+                return;
+            }
+
+            const clonedSvg = graphSvg.cloneNode(true);
+            const styleText = Array.from(document.querySelectorAll('style'))
+                .map(style => style.textContent)
+                .join('\n');
+
+            const defs = clonedSvg.querySelector('defs') ||
+                clonedSvg.insertBefore(document.createElementNS('http://www.w3.org/2000/svg', 'defs'), clonedSvg.firstChild);
+            const styleNode = document.createElementNS('http://www.w3.org/2000/svg', 'style');
+            styleNode.textContent = styleText;
+            defs.appendChild(styleNode);
+
+            clonedSvg.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+            clonedSvg.setAttribute('xmlns:xlink', 'http://www.w3.org/1999/xlink');
+
+            const serializer = new XMLSerializer();
+            const svgString = serializer.serializeToString(clonedSvg);
+            const svgBlob = new Blob([svgString], { type: 'image/svg+xml;charset=utf-8' });
+            const svgUrl = URL.createObjectURL(svgBlob);
+
+            const img = new Image();
+            img.onload = () => {
+                const scale = Math.max(3, Math.ceil(window.devicePixelRatio * 2));
+                const canvas = document.createElement('canvas');
+                canvas.width = width * scale;
+                canvas.height = height * scale;
+
+                const ctx = canvas.getContext('2d');
+                ctx.fillStyle = '#2d2d2d';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+                URL.revokeObjectURL(svgUrl);
+
+                canvas.toBlob((pngBlob) => {
+                    if (!pngBlob) {
+                        alert('No se pudo generar el PNG.');
+                        return;
+                    }
+
+                    const downloadUrl = URL.createObjectURL(pngBlob);
+                    const a = document.createElement('a');
+                    a.href = downloadUrl;
+                    a.download = `uade-arbol-${new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19)}.png`;
+                    a.click();
+                    setTimeout(() => URL.revokeObjectURL(downloadUrl), 1000);
+                }, 'image/png', 1);
+            };
+
+            img.onerror = () => {
+                URL.revokeObjectURL(svgUrl);
+                alert('Hubo un error al renderizar la imagen para exportar.');
+            };
+
+            img.src = svgUrl;
+        }
+
         function resetLayout(tipo = 'cuatrimestre') {
-            // Ocultar menú
-            document.getElementById('layoutMenu').style.display = 'none';
+            // Ocultar menús
+            hideDropdownMenus();
             
             // Limpiar posiciones guardadas
             localStorage.removeItem('nodePositions');
@@ -1755,6 +2324,12 @@
                 layoutPorCuatrimestre();
             } else if (tipo === 'ramas') {
                 layoutPorRamas();
+            } else if (tipo === 'planificacion') {
+                if (!hasPlanificacionCargada()) {
+                    alert('No hay planeamiento cargado para reordenar.');
+                    return;
+                }
+                layoutPorPlanificacion();
             }
         }
 
@@ -1874,6 +2449,74 @@
             updateLinks();
         }
 
+        function layoutPorPlanificacion() {
+            const padding = 60;
+            const startY = 50;
+            const completedStates = new Set(['aprobada', 'cursando', 'final-previo']);
+            const plannedIndexByCode = new Map();
+
+            planificacion.forEach((cuatri, idx) => {
+                (cuatri.materias || []).forEach(m => {
+                    plannedIndexByCode.set(m.codigo, idx);
+                });
+            });
+
+            const grupos = {};
+            nodes.forEach(node => {
+                const materia = materiasData.find(m => m.codigo === node.id);
+                const cuatriBase = (node.año - 1) * 2 + node.cuatrimestre - 1;
+                let key;
+
+                if (plannedIndexByCode.has(node.id)) {
+                    key = `plan-${plannedIndexByCode.get(node.id)}`;
+                } else if (materia && completedStates.has(materia.estadoUsuario)) {
+                    key = `hist-${cuatriBase}`;
+                } else {
+                    key = `extra-${cuatriBase}`;
+                }
+
+                if (!grupos[key]) grupos[key] = [];
+                grupos[key].push(node);
+            });
+
+            const sortKeysByNumericSuffix = (a, b) => parseInt(a.split('-')[1], 10) - parseInt(b.split('-')[1], 10);
+            const histKeys = Object.keys(grupos).filter(k => k.startsWith('hist-')).sort(sortKeysByNumericSuffix);
+            const planKeys = Object.keys(grupos).filter(k => k.startsWith('plan-')).sort(sortKeysByNumericSuffix);
+            const extraKeys = Object.keys(grupos).filter(k => k.startsWith('extra-')).sort(sortKeysByNumericSuffix);
+            const orderedKeys = [...histKeys, ...planKeys, ...extraKeys];
+
+            if (orderedKeys.length === 0) return;
+
+            const columnWidth = (width - 120) / orderedKeys.length;
+
+            orderedKeys.forEach((key, colIndex) => {
+                const grupo = grupos[key] || [];
+                grupo.sort((a, b) =>
+                    a.año - b.año ||
+                    a.cuatrimestre - b.cuatrimestre ||
+                    a.nombre.localeCompare(b.nombre, 'es')
+                );
+
+                const colX = padding + colIndex * columnWidth + columnWidth / 2;
+                const availableHeight = height - 100;
+                const itemHeight = Math.min(70, availableHeight / Math.max(grupo.length, 1));
+                const totalHeight = grupo.length * itemHeight;
+                const offsetY = startY + (availableHeight - totalHeight) / 2;
+
+                grupo.forEach((node, idx) => {
+                    node.x = colX;
+                    node.y = offsetY + 40 + (idx * itemHeight);
+                });
+            });
+
+            d3.selectAll('.node')
+                .transition()
+                .duration(800)
+                .attr("transform", d => `translate(${d.x},${d.y})`);
+
+            updateLinks();
+        }
+
         function updateStats() {
             const aprobadas = materiasData.filter(m => m.estadoUsuario === 'aprobada').length;
             const cursando = materiasData.filter(m => m.estadoUsuario === 'cursando' || m.estadoUsuario === 'final-previo').length;
@@ -1945,21 +2588,21 @@
                 const faltantes = primerAño.filter(m => m.estadoUsuario !== 'aprobada');
                 requisitos.push(`1° Año completo (faltan ${faltantes.length}: ${faltantes.map(m => m.nombre).join(', ')})`);
             } else {
-                requisitos.push('✓ 1° Año completo');
+                requisitos.push('[OK] 1° Año completo');
             }
             
             if (!segundoAñoCompleto) {
                 const faltantes = segundoAño.filter(m => m.estadoUsuario !== 'aprobada');
                 requisitos.push(`2° Año completo (faltan ${faltantes.length}: ${faltantes.map(m => m.nombre).join(', ')})`);
             } else {
-                requisitos.push('✓ 2° Año completo');
+                requisitos.push('[OK] 2° Año completo');
             }
             
             materiasEspecificasCompletas.forEach(item => {
                 if (!item.aprobada) {
                     requisitos.push(`${item.nombre}`);
                 } else {
-                    requisitos.push(`✓ ${item.nombre}`);
+                    requisitos.push(`[OK] ${item.nombre}`);
                 }
             });
             
@@ -2021,7 +2664,7 @@
         function limpiarDatos() {
             document.getElementById('dataMenu').style.display = 'none';
             
-            if (!confirm('⚠️ ¿Estás seguro de que quieres eliminar todos los datos?\n\nEsto incluye:\n- Estados de materias\n- Notas y calificaciones\n- Horarios\n- Planificación\n- Optativas seleccionadas\n- Posiciones personalizadas\n\nEsta acción no se puede deshacer.')) {
+            if (!confirm('Atención: ¿Estás seguro de que quieres eliminar todos los datos?\n\nEsto incluye:\n- Estados de materias\n- Notas y calificaciones\n- Horarios\n- Planificación\n- Optativas seleccionadas\n- Posiciones personalizadas\n\nEsta acción no se puede deshacer.')) {
                 return;
             }
 
@@ -2033,7 +2676,7 @@
             localStorage.removeItem('optativasSeleccionadas');
             localStorage.removeItem('nodePositions');
 
-            alert('✅ Todos los datos han sido eliminados');
+            alert('Todos los datos han sido eliminados.');
             location.reload();
         }
 
@@ -2053,7 +2696,7 @@
                         
                         // Validar versión
                         if (!data.version) {
-                            warnings.push('⚠️ Formato de archivo antiguo, intentando importar...');
+                            warnings.push('Advertencia: Formato de archivo antiguo, intentando importar...');
                         }
 
                         // Importar estados de materias
@@ -2132,7 +2775,7 @@
 
                         // Soporte para formato antiguo
                         if (data.materias && !data.estados) {
-                            warnings.push('⚠️ Formato antiguo detectado. Convirtiendo...');
+                            warnings.push('Advertencia: Formato antiguo detectado. Convirtiendo...');
                             data.materias.forEach(importedMateria => {
                                 const materia = materiasData.find(m => m.codigo === importedMateria.codigo);
                                 if (materia && importedMateria.estadoUsuario) {
@@ -2160,13 +2803,11 @@
         // Cerrar menú contextual al hacer clic fuera
         document.addEventListener('click', hideContextMenu);
 
-        // Cerrar menú de layout al hacer clic fuera
+        // Cerrar dropdowns al hacer clic fuera
         document.addEventListener('click', function(event) {
-            const layoutMenu = document.getElementById('layoutMenu');
-            const layoutButton = event.target.closest('.btn-primary');
-            
-            if (layoutMenu && !layoutMenu.contains(event.target) && !layoutButton) {
-                layoutMenu.style.display = 'none';
+            const controlsLeft = document.querySelector('.controls-left');
+            if (controlsLeft && !controlsLeft.contains(event.target)) {
+                hideDropdownMenus();
             }
         });
 
@@ -2300,6 +2941,18 @@
             const container = document.getElementById('planificadorContainer');
             container.innerHTML = '';
 
+            const tools = document.createElement('div');
+            tools.className = 'planificador-tools';
+            tools.innerHTML = `
+                <button class="btn btn-primary" onclick="promptSmartPlanGeneration()">
+                    <i class="bi bi-magic icon" aria-hidden="true"></i>Generar Plan Inteligente
+                </button>
+                <div class="planificador-tools-note">
+                    Prioriza pack del plan, correlativas y reglas especiales (Inglés no consume cupo 7; PPS y Proyecto Final anual sí).
+                </div>
+            `;
+            container.appendChild(tools);
+
             // Verificar si hay materias pendientes (no planificadas aún)
             const materiasPendientes = getMateriasPendientes();
             
@@ -2323,10 +2976,12 @@
                 const card = document.createElement('div');
                 card.className = 'cuatrimestre-card';
                 
-                const canAddMore = cuatri.materias.length < 7;
+                const hardCount = countHardCupoMaterias(cuatri.materias);
                 const materiasDisponibles = materiasPendientes.filter(m => 
                     !cuatri.materias.some(cm => cm.codigo === m.codigo)
                 );
+                const inglesDisponible = materiasDisponibles.some(m => isExamenIngles(m));
+                const canAddMore = hardCount < PLAN_MAX_MATERIAS_POR_CUATRI || inglesDisponible;
 
                 // Verificar si hay materias disponibles para este cuatrimestre específico
                 const hayMateriasParaAgregar = canAddMore && materiasDisponibles.length > 0;
@@ -2335,8 +2990,8 @@
                     <div class="cuatrimestre-header">
                         <div class="cuatrimestre-title">Cuatrimestre ${idx + 1}</div>
                         <div style="display: flex; gap: 10px; align-items: center;">
-                            <div class="cuatrimestre-count">${cuatri.materias.length}/7 materias</div>
-                            ${cuatri.materias.length > 0 ? `<button class="btn btn-secondary" style="padding: 4px 8px; font-size: 0.85em;" onclick="deleteCuatrimestre(${idx})">❌ Borrar</button>` : ''}
+                            <div class="cuatrimestre-count">${hardCount}/${PLAN_MAX_MATERIAS_POR_CUATRI} materias${cuatri.materias.some(m => isExamenIngles(m)) ? ' + Inglés' : ''}</div>
+                            ${cuatri.materias.length > 0 ? `<button class="btn btn-secondary" style="padding: 4px 8px; font-size: 0.85em;" onclick="deleteCuatrimestre(${idx})"><i class="bi bi-trash3 icon" aria-hidden="true"></i>Borrar</button>` : ''}
                         </div>
                     </div>
                     <div class="materias-list">
@@ -2349,7 +3004,7 @@
                     </div>
                     ${hayMateriasParaAgregar ? `
                         <select class="add-materia-select" onchange="addMateriaToCuatri(${idx}, this.value); this.value='';">
-                            <option value="">+ Agregar materia (${7 - cuatri.materias.length} disponibles)</option>
+                            <option value="">+ Agregar materia (${Math.max(0, PLAN_MAX_MATERIAS_POR_CUATRI - hardCount)} cupo${inglesDisponible ? ' + Inglés' : ''})</option>
                             ${materiasDisponibles.map(m => 
                                 `<option value="${m.codigo}">${m.nombre}</option>`
                             ).join('')}
@@ -2359,6 +3014,220 @@
                 
                 container.appendChild(card);
             });
+
+            updateLayoutMenuOptions();
+        }
+
+        function getCurrentAcademicCuatri() {
+            const month = new Date().getMonth() + 1;
+            return month >= 8 ? 2 : 1;
+        }
+
+        function getNextAcademicCuatri() {
+            return getCurrentAcademicCuatri() === 1 ? 2 : 1;
+        }
+
+        function getAcademicCuatriFromOffset(startCuatri, offset) {
+            return ((startCuatri - 1 + offset) % 2) + 1;
+        }
+
+        function promptSmartPlanGeneration() {
+            const raw = prompt(
+                `¿Cuántas materias por cuatrimestre querés planificar?\n\nValor recomendado: 5\nMáximo permitido: ${PLAN_MAX_MATERIAS_POR_CUATRI}\n\nNota: Inglés, PPS y Proyecto Final NO cuentan para este cupo objetivo.\nAdemás, Inglés tampoco consume el tope duro de 7 por cuatrimestre.`,
+                '5'
+            );
+            if (raw === null) return;
+
+            const materiasPorCuatri = parseInt(raw, 10);
+            if (isNaN(materiasPorCuatri) || materiasPorCuatri < 1 || materiasPorCuatri > PLAN_MAX_MATERIAS_POR_CUATRI) {
+                alert(`Ingresá un número entre 1 y ${PLAN_MAX_MATERIAS_POR_CUATRI}.`);
+                return;
+            }
+
+            const tienePlanActual = planificacion.some(c => c.materias.length > 0);
+            if (tienePlanActual && !confirm('Esto reemplaza la planificación actual. ¿Continuar?')) {
+                return;
+            }
+
+            const resultado = generateSmartPlan(materiasPorCuatri);
+            if (!resultado.ok) {
+                alert(resultado.message);
+                return;
+            }
+
+            planificacion = resultado.plan;
+            savePlanificacion();
+            renderPlanificador();
+
+            let summary = `Plan generado en ${resultado.plan.length} cuatrimestre(s), con ${materiasPorCuatri} materia(s) objetivo por cuatrimestre.`;
+            if (resultado.warnings.length > 0) {
+                summary += `\n\nAdvertencias:\n- ${resultado.warnings.join('\n- ')}`;
+            }
+            alert(summary);
+        }
+
+        function isMateriaEligibleForSmartPlan(materia, realCuatri, projectedApprovedCount, pendingCount, materiasPorCuatri) {
+            if (materia.codigo === CODIGO_PROYECTO_FINAL) {
+                if (realCuatri !== 1) return false; // Anual: se inicia en 1° cuatrimestre
+
+                // Aproximación para llegar a 38 aprobadas al rendir (fin de año)
+                const minAprobadasParaAnotarse = Math.max(30, 38 - (materiasPorCuatri * 2));
+                if (projectedApprovedCount < minAprobadasParaAnotarse) return false;
+
+                // Mantenerlo cerca del final pero sin dejarlo completamente aislado
+                if (pendingCount > Math.max(12, materiasPorCuatri * 2 + 2)) return false;
+            }
+            return true;
+        }
+
+        function isSpecialPlanMateria(materia) {
+            return [CODIGO_EXAMEN_INGLES, CODIGO_PPS, CODIGO_PROYECTO_FINAL].includes(materia.codigo);
+        }
+
+        function getMateriaSmartScore(materia, realCuatri, projectedApprovedCount, pendingCodes) {
+            let score = 0;
+
+            // Prioridad por "pack" del plan (dictado por cuatrimestre)
+            score += materia.cuatrimestre === realCuatri ? -30 : 12;
+            score += (materia.año * 10) + materia.cuatrimestre;
+
+            // Priorizar materias que desbloquean otras pendientes
+            const desbloquea = materiasData.reduce((acc, other) => {
+                return acc + (other.correlativas.includes(materia.codigo) && pendingCodes.has(other.codigo) ? 1 : 0);
+            }, 0);
+            score -= Math.min(desbloquea, 8) * 2;
+
+            // Trámites: no ponerlos demasiado temprano, pero tampoco patearlos de más
+            if (materia.codigo === CODIGO_EXAMEN_INGLES) {
+                // Tratarlo como examen previo: puede ubicarse en cualquier cuatrimestre
+                score -= 2;
+            }
+
+            if (materia.codigo === CODIGO_PPS) {
+                if (projectedApprovedCount < 30) score += 60;
+                if (materia.cuatrimestre === realCuatri) score -= 4;
+            }
+
+            // Proyecto Final anual: mantener cerca del cierre
+            if (materia.codigo === CODIGO_PROYECTO_FINAL) {
+                score += 80;
+                if (projectedApprovedCount >= 36) score -= 20;
+            }
+
+            return score;
+        }
+
+        function generateSmartPlan(materiasPorCuatri = 5) {
+            const planificables = materiasData.filter(m =>
+                m.estadoUsuario !== 'aprobada' &&
+                m.estadoUsuario !== 'cursando' &&
+                m.estadoUsuario !== 'final-previo'
+            );
+
+            if (planificables.length === 0) {
+                return { ok: false, message: 'No hay materias pendientes para planificar.', plan: [], warnings: [] };
+            }
+
+            const materiaByCode = new Map(materiasData.map(m => [m.codigo, m]));
+            const pendingCodes = new Set(planificables.map(m => m.codigo));
+            const satisfiedCodes = new Set(
+                materiasData
+                    .filter(m => m.estadoUsuario === 'aprobada' || m.estadoUsuario === 'cursando' || m.estadoUsuario === 'final-previo')
+                    .map(m => m.codigo)
+            );
+
+            let projectedApprovedCount = materiasData.filter(m => m.estadoUsuario === 'aprobada').length;
+            const startCuatri = getNextAcademicCuatri();
+            const plan = [];
+            const warnings = [];
+            let idleStreak = 0;
+            const maxCuatrisToGenerate = 30;
+
+            while (pendingCodes.size > 0 && plan.length < maxCuatrisToGenerate) {
+                const realCuatri = getAcademicCuatriFromOffset(startCuatri, plan.length);
+                const pendingMaterias = Array.from(pendingCodes)
+                    .map(codigo => materiaByCode.get(codigo))
+                    .filter(Boolean);
+
+                let candidatas = pendingMaterias
+                    .filter(m => m.correlativas.every(corr => satisfiedCodes.has(corr)))
+                    .filter(m => isMateriaEligibleForSmartPlan(m, realCuatri, projectedApprovedCount, pendingCodes.size, materiasPorCuatri));
+
+                candidatas.sort((a, b) => {
+                    const scoreA = getMateriaSmartScore(a, realCuatri, projectedApprovedCount, pendingCodes);
+                    const scoreB = getMateriaSmartScore(b, realCuatri, projectedApprovedCount, pendingCodes);
+                    if (scoreA !== scoreB) return scoreA - scoreB;
+                    return a.nombre.localeCompare(b.nombre, 'es');
+                });
+
+                const candidatasRegulares = candidatas.filter(m => !isSpecialPlanMateria(m));
+                const candidatasEspeciales = candidatas.filter(m => isSpecialPlanMateria(m));
+
+                // El cupo del alumno aplica a materias regulares
+                const seleccionRegulares = candidatasRegulares.slice(0, materiasPorCuatri);
+
+                // Especiales se suman por fuera del cupo.
+                // Inglés no consume tope duro; PPS y Proyecto Final sí.
+                const seleccionEspeciales = [];
+                let hardCount = countHardCupoMaterias(seleccionRegulares);
+                candidatasEspeciales.forEach(m => {
+                    if (isExamenIngles(m)) {
+                        seleccionEspeciales.push(m);
+                        return;
+                    }
+                    if (hardCount < PLAN_MAX_MATERIAS_POR_CUATRI) {
+                        seleccionEspeciales.push(m);
+                        hardCount += 1;
+                    }
+                });
+
+                const seleccionadas = [...seleccionRegulares, ...seleccionEspeciales];
+
+                // Evitar que Proyecto Final quede solo si existe alguna alternativa compatible
+                const proyectoSolo = seleccionadas.length === 1 && seleccionadas[0].codigo === CODIGO_PROYECTO_FINAL;
+                if (proyectoSolo && materiasPorCuatri > 1) {
+                    const alternativa = candidatasRegulares.find(m => m.codigo !== CODIGO_PROYECTO_FINAL);
+                    if (alternativa && countHardCupoMaterias(seleccionadas) < PLAN_MAX_MATERIAS_POR_CUATRI) {
+                        seleccionadas.push(alternativa);
+                    }
+                }
+
+                if (seleccionadas.length === 0) {
+                    plan.push({ materias: [] });
+                    idleStreak += 1;
+
+                    if (idleStreak >= 4) {
+                        warnings.push('No se pudieron asignar materias en varios cuatrimestres consecutivos por restricciones de correlativas o reglas especiales.');
+                        break;
+                    }
+                    continue;
+                }
+
+                idleStreak = 0;
+                const materiasPlan = seleccionadas.map(m => ({ codigo: m.codigo, nombre: m.nombre }));
+                plan.push({ materias: materiasPlan });
+
+                seleccionadas.forEach(m => {
+                    pendingCodes.delete(m.codigo);
+                    satisfiedCodes.add(m.codigo);
+                    projectedApprovedCount += 1;
+                });
+            }
+
+            while (plan.length > 0 && plan[plan.length - 1].materias.length === 0) {
+                plan.pop();
+            }
+
+            if (pendingCodes.size > 0) {
+                const faltantes = Array.from(pendingCodes).slice(0, 8).join(', ');
+                warnings.push(`Quedaron materias sin ubicar automáticamente: ${faltantes}${pendingCodes.size > 8 ? ', ...' : ''}.`);
+            }
+
+            if (plan.length === 0) {
+                return { ok: false, message: 'No se pudo generar un plan válido con las restricciones actuales.', plan: [], warnings };
+            }
+
+            return { ok: true, plan, warnings };
         }
 
         function getMateriasPendientes() {
@@ -2377,13 +3246,18 @@
             const materia = materiasData.find(m => m.codigo === codigo);
             if (!materia) return;
 
-            if (planificacion[cuatriIdx].materias.length < 7) {
+            const hardCountActual = countHardCupoMaterias(planificacion[cuatriIdx].materias);
+            const puedeAgregar = isExamenIngles(materia) || hardCountActual < PLAN_MAX_MATERIAS_POR_CUATRI;
+
+            if (puedeAgregar) {
                 planificacion[cuatriIdx].materias.push({
                     codigo: materia.codigo,
                     nombre: materia.nombre
                 });
                 savePlanificacion();
                 renderPlanificador();
+            } else {
+                alert(`Este cuatrimestre ya alcanzó el tope de ${PLAN_MAX_MATERIAS_POR_CUATRI} materias.`);
             }
         }
 
@@ -2416,6 +3290,7 @@
             if (saved) {
                 planificacion = JSON.parse(saved);
             }
+            updateLayoutMenuOptions();
         }
 
         // OPTATIVAS Y MINORS
@@ -2545,7 +3420,7 @@
                         <div class="minor-header">
                             <div class="minor-title">${minor}</div>
                             <div class="minor-progress ${completado ? 'completed' : ''}">
-                                ${seleccionadas}/3 materias ${completado ? '✓ Minor Completado' : ''}
+                                ${seleccionadas}/3 materias ${completado ? '<i class="bi bi-patch-check-fill icon icon-status-success" aria-hidden="true"></i>Minor Completado' : ''}
                             </div>
                         </div>
                         <div class="optativas-list">
@@ -2638,19 +3513,19 @@
                     <div class="estado-selector">
                         <div class="estado-option ${materia.estadoUsuario === 'ninguno' ? 'selected' : ''}" 
                              onclick="updateMateriaEstadoFromModal('${materia.codigo}', 'ninguno')">
-                            ⚪ Sin Estado
+                            <i class="bi bi-circle icon icon-status-neutral" aria-hidden="true"></i>Sin Estado
                         </div>
                         <div class="estado-option ${materia.estadoUsuario === 'cursando' ? 'selected' : ''}" 
                              onclick="updateMateriaEstadoFromModal('${materia.codigo}', 'cursando')">
-                            📝 Cursando
+                            <i class="bi bi-pencil-square icon icon-status-inprogress" aria-hidden="true"></i>Cursando
                         </div>
                         <div class="estado-option ${materia.estadoUsuario === 'final-previo' ? 'selected' : ''}" 
                              onclick="updateMateriaEstadoFromModal('${materia.codigo}', 'final-previo')">
-                            🔴 Final Previo
+                            <i class="bi bi-record-circle-fill icon icon-status-danger" aria-hidden="true"></i>Final Previo
                         </div>
                         <div class="estado-option ${materia.estadoUsuario === 'aprobada' ? 'selected' : ''}" 
                              onclick="updateMateriaEstadoFromModal('${materia.codigo}', 'aprobada')">
-                            ✅ Aprobada
+                            <i class="bi bi-check-circle-fill icon icon-status-success" aria-hidden="true"></i>Aprobada
                         </div>
                     </div>
                 </div>
@@ -2745,12 +3620,22 @@
             }
         }
 
+        // Atajo de teclado para búsqueda
+        document.addEventListener('keydown', function(event) {
+            if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'k') {
+                event.preventDefault();
+                openSearchModal();
+            }
+        });
+
         // Cerrar modales al hacer clic fuera
         window.onclick = function(event) {
             const horariosModal = document.getElementById('horariosModal');
             const planificadorModal = document.getElementById('planificadorModal');
             const optativasModal = document.getElementById('optativasModal');
             const materiaInfoModal = document.getElementById('materiaInfoModal');
+            const searchModal = document.getElementById('searchModal');
+            const statusFilterModal = document.getElementById('statusFilterModal');
             if (event.target == horariosModal) {
                 closeHorariosModal();
             }
@@ -2762,6 +3647,12 @@
             }
             if (event.target == materiaInfoModal) {
                 closeMateriaInfoModal();
+            }
+            if (event.target == searchModal) {
+                closeSearchModal();
+            }
+            if (event.target == statusFilterModal) {
+                closeStatusFilterModal();
             }
         }
 
